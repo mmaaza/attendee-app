@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast'; // Import toast without Toaster
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const RegistrationPage = () => {
     country: '',
     interests: []
   });
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -20,7 +21,7 @@ const RegistrationPage = () => {
       [name]: value
     }));
   };
-  
+
   const handleCheckbox = (e) => {
     const { value, checked } = e.target;
     setFormData(prev => {
@@ -31,161 +32,273 @@ const RegistrationPage = () => {
       }
     });
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
+    // Form validation with toast notifications
+    if (!formData.firstName.trim()) {
+      toast.error('Please enter your first name');
+      return;
+    }
+
+    if (!formData.lastName.trim()) {
+      toast.error('Please enter your last name');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      toast.error('Please enter your email address');
+      return;
+    }
+
+    // Email validation using regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+
+    if (!formData.company.trim()) {
+      toast.error('Please enter your company/organization');
+      return;
+    }
+
+    if (!formData.jobTitle.trim()) {
+      toast.error('Please enter your job title');
+      return;
+    }
+
+    if (!formData.country) {
+      toast.error('Please select your country');
+      return;
+    }
+
+    if (formData.interests.length === 0) {
+      toast.error('Please select at least one area of interest');
+      return;
+    }
+
+    // Show loading toast while processing
+    const loadingToast = toast.loading('Processing your registration...');
+
     // In a real app, you would send this data to your backend
     console.log('Form submitted:', formData);
-    
+
     // Generate a unique ID for the attendee (would come from your backend in a real app)
-    const attendeeId = `IDS2025-${Math.floor(100000 + Math.random() * 900000)}`;
-    
-    // Navigate to confirmation page with form data
-    navigate('/registration-confirmation', { 
-      state: { 
-        ...formData,
-        attendeeId 
-      } 
-    });
+    const attendeeId = `NDT2025-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    // Simulate an API call with a small delay
+    setTimeout(() => {
+      // Dismiss the loading toast
+      toast.dismiss(loadingToast);
+
+      // Show success toast
+      toast.success('Registration successful! Redirecting to confirmation page...');
+
+      // Navigate to confirmation page with form data
+      navigate('/registration-confirmation', {
+        state: {
+          ...formData,
+          attendeeId
+        }
+      });
+    }, 1000);
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-8">Register for IDS 2025</h1>
-      
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-              First Name *
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name *
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-              Company/Organization *
-            </label>
-            <input
-              type="text"
-              id="company"
-              name="company"
-              value={formData.company}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700 mb-1">
-              Job Title *
-            </label>
-            <input
-              type="text"
-              id="jobTitle"
-              name="jobTitle"
-              value={formData.jobTitle}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-              Country *
-            </label>
-            <select
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Select your country</option>
-              <option value="Germany">Germany</option>
-              <option value="United States">United States</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="France">France</option>
-              <option value="Italy">Italy</option>
-              <option value="Spain">Spain</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 py-12">
+      {/* Remove the Toaster component from here since it's now in App.jsx */}
+
+      {/* Decorative elements */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-accent-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+      <div className="absolute bottom-20 right-20 w-72 h-72 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-10">
+          <h1 className="font-display text-4xl md:text-5xl font-bold text-secondary-900 mb-2">
+            Register for NepDent IDS 2025
+          </h1>
+          <p className="text-secondary-600 text-lg max-w-2xl mx-auto">
+            Join us in Kathmandu on April 18-20, 2025 for the premier dental event in Nepal
+          </p>
         </div>
-        
-        <div className="mt-6">
-          <p className="block text-sm font-medium text-gray-700 mb-2">Areas of Interest (select all that apply)</p>
-          <div className="grid md:grid-cols-2 gap-2">
-            {['Dental Equipment', 'Materials', 'Technology', 'Preventive Care', 'Aesthetics', 'Oral Surgery'].map(interest => (
-              <div key={interest} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={interest}
-                  name="interests"
-                  value={interest}
-                  checked={formData.interests.includes(interest)}
-                  onChange={handleCheckbox}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor={interest} className="ml-2 text-sm text-gray-700">
-                  {interest}
-                </label>
+
+        <form
+          onSubmit={handleSubmit}
+          noValidate // Add noValidate to prevent browser validation to handle it ourselves
+          className="bg-white rounded-2xl shadow-card border border-secondary-100 p-6 md:p-8 transition-all duration-300 hover:shadow-xl"
+        >
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-semibold text-secondary-700 mb-1">
+                First Name *
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
+                placeholder="Your first name"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Last Name *
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
+                placeholder="Your last name"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
+                placeholder="you@example.com"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="company" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Company/Organization *
+              </label>
+              <input
+                type="text"
+                id="company"
+                name="company"
+                value={formData.company}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
+                placeholder="Your organization"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="jobTitle" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Job Title *
+              </label>
+              <input
+                type="text"
+                id="jobTitle"
+                name="jobTitle"
+                value={formData.jobTitle}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
+                placeholder="Your role"
+                autoComplete="off"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="country" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Country *
+              </label>
+              <div className="relative">
+                <select
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  required
+                  className="appearance-none w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors bg-white pr-10"
+                >
+                  <option value="">Select your country</option>
+                  <option value="Nepal">Nepal</option>
+                  <option value="India">India</option>
+                  <option value="Germany">Germany</option>
+                  <option value="United States">United States</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="France">France</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <p className="block text-sm font-semibold text-secondary-700 mb-3">Areas of Interest (select all that apply)</p>
+            <div className="bg-secondary-50 p-5 rounded-xl border border-secondary-100">
+              <div className="grid md:grid-cols-2 gap-4">
+                {['Dental Equipment', 'Materials', 'Technology', 'Preventive Care', 'Aesthetics', 'Oral Surgery', 'Digital Dentistry', 'Education'].map(interest => (
+                  <div key={interest} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={interest}
+                      name="interests"
+                      value={interest}
+                      checked={formData.interests.includes(interest)}
+                      onChange={handleCheckbox}
+                      className="h-5 w-5 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded transition-colors"
+                    />
+                    <label htmlFor={interest} className="ml-3 text-secondary-700 hover:text-primary-600 transition-colors">
+                      {interest}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <button
+              type="submit"
+              className="bg-primary-600 text-white px-8 py-3 rounded-xl font-medium shadow-lg hover:bg-primary-700 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            >
+              Complete Registration
+            </button>
+            <p className="text-sm text-secondary-500 mt-4">
+              By registering, you agree to our <a href="#" className="text-primary-600 hover:text-primary-700 underline">Terms of Service</a> and <a href="#" className="text-primary-600 hover:text-primary-700 underline">Privacy Policy</a>
+            </p>
+          </div>
+        </form>
+
+        <div className="mt-8 bg-white p-5 rounded-xl shadow-sm border border-secondary-100">
+          <div className="flex items-start gap-3">
+            <div className="text-accent-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-secondary-900 font-semibold">Registration Information</h3>
+              <p className="text-secondary-600 text-sm mt-1">
+                After registration, you will receive a confirmation email with your attendee ID and detailed event information. For assistance, contact <span className="text-primary-600">support@nepdent.com</span>
+              </p>
+            </div>
           </div>
         </div>
-        
-        <div className="mt-8 text-center">
-          <button 
-            type="submit"
-            className="bg-blue-600 text-white py-2 px-6 rounded-lg text-lg hover:bg-blue-700 transition-colors"
-          >
-            Complete Registration
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };
