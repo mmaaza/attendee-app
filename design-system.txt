@@ -3,6 +3,8 @@
 ## Event Location: Kathmandu, Nepal
 ## Event Date: April 18-20, 2025
 
+## Use mobile first design approach
+
 ## Color Palette
 - Primary: Blue shades
   - primary-50: Light blue background

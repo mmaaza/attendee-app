@@ -229,7 +229,7 @@ const HomePage = () => {
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h2 className="text-3xl font-bold text-white mb-6 font-display">Secure Your Place at the World's Premier Dental Event</h2>
-          <p className="text-xl text-primary-100 mb-8">March 10-14, 2025 • Koelnmesse, Cologne, Germany</p>
+          <p className="text-xl text-primary-100 mb-8">April 18-20, 2025 • Koelnmesse, Cologne, Germany</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link to="/register" className="inline-flex items-center px-8 py-4 text-lg font-medium rounded-xl bg-white text-primary-700 shadow-lg hover:bg-primary-50 transition-colors">
               Register Now
@@ -255,7 +255,7 @@ const HomePage = () => {
                 </div>
                 <div>
                   <dt className="font-semibold text-secondary-900">Date</dt>
-                  <dd className="text-secondary-600">March 10-14, 2025</dd>
+                  <dd className="text-secondary-600">April 18-20, 2025</dd>
                 </div>
               </div>
               

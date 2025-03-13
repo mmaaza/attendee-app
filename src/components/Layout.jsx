@@ -6,10 +6,10 @@ const Layout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container mx-auto p-4">
+      <main className="flex-grow container mx-auto">
         <Outlet />
       </main>
-      <footer className="bg-gray-800 text-white p-4">
+      <footer className="bg-gray-800 text-white p-4 print:hidden">
         <div className="container mx-auto">
           <p className="text-center">© {new Date().getFullYear()} International Dental Show 2025. All rights reserved.</p>
         </div>

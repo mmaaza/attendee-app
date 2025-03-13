@@ -68,7 +68,7 @@ const RegistrationConfirmationPage = () => {
           </div>
         </div>
         
-        {/* Digital Pass Card */}
+        {/* Digital Pass Card - updated to match DigitalPassPage */}
         <div className="bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-300 mb-8 border border-secondary-100">
           <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white p-6">
             <h2 className="text-xl font-display font-bold flex items-center">
@@ -79,60 +79,70 @@ const RegistrationConfirmationPage = () => {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 p-6">
-            {/* QR Code section with improved styling */}
-            <div className="flex flex-col items-center justify-center">
-              <div className="bg-secondary-50 p-4 rounded-xl border border-secondary-100 shadow-inner w-64 h-64 flex items-center justify-center relative">
-                <div className="w-48 h-48 relative">
-                  {/* QR Code Border Animation */}
-                  <div className="absolute -inset-2 bg-gradient-to-r from-primary-300 via-accent-500 to-primary-300 rounded-lg opacity-50 animate-pulse"></div>
-                  {/* This would be an actual QR code in a production app */}
-                  <div className="relative bg-white border-2 border-secondary-200 w-full h-full grid grid-cols-6 grid-rows-6 gap-0.5 p-3 rounded-lg">
-                    {Array(36).fill().map((_, i) => (
-                      <div 
-                        key={i} 
-                        className={`${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}`}>
-                      </div>
-                    ))}
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              {/* QR Code - updated to match DigitalPassPage */}
+              <div className="flex flex-col items-center justify-center">
+                <div className="bg-secondary-50 p-4 rounded-xl border border-secondary-100 shadow-inner w-48 h-48 flex items-center justify-center relative">
+                  <div className="w-40 h-40 relative">
+                    {/* QR Code Border Animation */}
+                    <div className="absolute -inset-2 bg-gradient-to-r from-primary-300 via-accent-500 to-primary-300 rounded-lg opacity-50 animate-pulse"></div>
+                    {/* This would be an actual QR code in a production app */}
+                    <div className="relative bg-white border-2 border-secondary-200 w-full h-full grid grid-cols-6 grid-rows-6 gap-0.5 p-3 rounded-lg">
+                      {Array(36).fill().map((_, i) => (
+                        <div 
+                          key={i} 
+                          className={`${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}`}>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+                <div className="mt-2 text-xs text-center text-secondary-600 bg-primary-50 rounded-full px-3 py-1">
+                  <span className="font-medium">Scan for verification</span>
+                </div>
               </div>
-              <div className="mt-4 text-sm text-center text-secondary-600 bg-primary-50 rounded-full px-4 py-1">
-                <span className="font-medium">Scan for entry</span>
-              </div>
-            </div>
-
-            {/* Attendee Information with improved styling */}
-            <div className="flex flex-col justify-center">
-              <div className="space-y-3">
-                <h3 className="text-2xl font-bold text-secondary-900 border-b border-secondary-100 pb-2">
+              
+              {/* Attendee Information */}
+              <div className="flex-grow">
+                <h3 className="text-lg font-semibold text-secondary-700 uppercase tracking-wider border-b border-secondary-100 pb-2 mb-4">
+                  Attendee Information
+                </h3>
+                
+                <h3 className="text-2xl font-bold text-secondary-900">
                   {registrationData.firstName} {registrationData.lastName}
                 </h3>
                 
-                <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center mt-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-secondary-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  <p className="text-secondary-700 font-medium">{registrationData.company}</p>
+                  <p className="text-secondary-700">{registrationData.company}</p>
                 </div>
                 
-                <div className="flex items-start">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-400 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center mt-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-secondary-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <p className="text-secondary-700">{registrationData.jobTitle}</p>
+                  <p className="text-secondary-600">{registrationData.jobTitle}</p>
                 </div>
                 
-                <div className="mt-6 pt-4 border-t border-dashed border-secondary-200">
-                  <div className="flex justify-between items-center">
-                    <div className="bg-accent-50 text-accent-700 px-3 py-1 rounded-full text-sm font-medium">
+                <div className="mt-4 pt-3 border-t border-dashed border-secondary-200">
+                  <p className="text-sm text-secondary-500 font-medium">Attendee ID</p>
+                  <div className="flex items-center">
+                    <p className="font-mono text-secondary-700">{registrationData.attendeeId}</p>
+                    <div className="ml-3 bg-accent-50 text-accent-700 px-3 py-1 rounded-full text-sm font-medium">
                       Attendee
                     </div>
-                    <p className="text-sm font-mono text-secondary-500">ID: {registrationData.attendeeId}</p>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+          
+          {/* Footer */}
+          <div className="w-full text-center py-4 border-t border-secondary-100 bg-secondary-50">
+            <p className="text-secondary-600 text-sm mb-1">Please present this pass at the entrance for verification</p>
           </div>
         </div>
         
