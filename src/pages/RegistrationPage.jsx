@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast'; // Import toast without Toaster
+import toast from 'react-hot-toast';
+import { db } from '../../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const RegistrationPage = () => {
     interests: []
   });
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -22,6 +25,7 @@ const RegistrationPage = () => {
     }));
   };
 
+  // Handle checkbox changes
   const handleCheckbox = (e) => {
     const { value, checked } = e.target;
     setFormData(prev => {
@@ -33,87 +37,81 @@ const RegistrationPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Form validation with toast notifications
+    // Form validation
     if (!formData.firstName.trim()) {
       toast.error('Please enter your first name');
       return;
     }
-
     if (!formData.lastName.trim()) {
       toast.error('Please enter your last name');
       return;
     }
-
     if (!formData.email.trim()) {
       toast.error('Please enter your email address');
       return;
     }
-
-    // Email validation using regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       toast.error('Please enter a valid email address');
       return;
     }
-
     if (!formData.company.trim()) {
       toast.error('Please enter your company/organization');
       return;
     }
-
     if (!formData.jobTitle.trim()) {
       toast.error('Please enter your job title');
       return;
     }
-
     if (!formData.country) {
       toast.error('Please select your country');
       return;
     }
-
     if (formData.interests.length === 0) {
       toast.error('Please select at least one area of interest');
       return;
     }
 
-    // Show loading toast while processing
+    // Show loading toast
     const loadingToast = toast.loading('Processing your registration...');
 
-    // In a real app, you would send this data to your backend
-    console.log('Form submitted:', formData);
+    try {
+      // Save data to Firestore
+      const docRef = await addDoc(collection(db, 'users'), {
+        ...formData,
+        createdAt: new Date() // Add a timestamp
+      });
 
-    // Generate a unique ID for the attendee (would come from your backend in a real app)
-    const attendeeId = `NDT2025-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    // Simulate an API call with a small delay
-    setTimeout(() => {
-      // Dismiss the loading toast
+      // Dismiss loading toast and show success message
       toast.dismiss(loadingToast);
-
-      // Show success toast
       toast.success('Registration successful! Redirecting to confirmation page...');
 
-      // Navigate to confirmation page with form data
+      // Navigate to confirmation page with Firestore-generated ID
       navigate('/registration-confirmation', {
         state: {
           ...formData,
-          attendeeId
+          attendeeId: docRef.id // Use Firestore document ID as attendee ID
         }
       });
-    }, 1000);
+    } catch (error) {
+      // Handle errors
+      toast.dismiss(loadingToast);
+      toast.error('Registration failed. Please try again.');
+      console.error('Error adding document: ', error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 py-12">
-      {/* Remove the Toaster component from here since it's now in App.jsx */}
-
       {/* Decorative elements */}
       <div className="absolute top-20 left-20 w-72 h-72 bg-accent-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
       <div className="absolute bottom-20 right-20 w-72 h-72 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
+      {/* Main content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-10">
           <h1 className="font-display text-4xl md:text-5xl font-bold text-secondary-900 mb-2">
@@ -124,12 +122,14 @@ const RegistrationPage = () => {
           </p>
         </div>
 
+        {/* Registration form */}
         <form
           onSubmit={handleSubmit}
-          noValidate // Add noValidate to prevent browser validation to handle it ourselves
+          noValidate
           className="bg-white rounded-2xl shadow-card border border-secondary-100 p-6 md:p-8 transition-all duration-300 hover:shadow-xl"
         >
           <div className="grid md:grid-cols-2 gap-6">
+            {/* First Name */}
             <div>
               <label htmlFor="firstName" className="block text-sm font-semibold text-secondary-700 mb-1">
                 First Name *
@@ -147,6 +147,7 @@ const RegistrationPage = () => {
               />
             </div>
 
+            {/* Last Name */}
             <div>
               <label htmlFor="lastName" className="block text-sm font-semibold text-secondary-700 mb-1">
                 Last Name *
@@ -164,6 +165,7 @@ const RegistrationPage = () => {
               />
             </div>
 
+            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-secondary-700 mb-1">
                 Email Address *
@@ -181,6 +183,7 @@ const RegistrationPage = () => {
               />
             </div>
 
+            {/* Company */}
             <div>
               <label htmlFor="company" className="block text-sm font-semibold text-secondary-700 mb-1">
                 Company/Organization *
@@ -198,6 +201,7 @@ const RegistrationPage = () => {
               />
             </div>
 
+            {/* Job Title */}
             <div>
               <label htmlFor="jobTitle" className="block text-sm font-semibold text-secondary-700 mb-1">
                 Job Title *
@@ -215,6 +219,7 @@ const RegistrationPage = () => {
               />
             </div>
 
+            {/* Country */}
             <div>
               <label htmlFor="country" className="block text-sm font-semibold text-secondary-700 mb-1">
                 Country *
@@ -246,6 +251,7 @@ const RegistrationPage = () => {
             </div>
           </div>
 
+          {/* Interests */}
           <div className="mt-8">
             <p className="block text-sm font-semibold text-secondary-700 mb-3">Areas of Interest (select all that apply)</p>
             <div className="bg-secondary-50 p-5 rounded-xl border border-secondary-100">
@@ -270,6 +276,7 @@ const RegistrationPage = () => {
             </div>
           </div>
 
+          {/* Submit button */}
           <div className="mt-10 text-center">
             <button
               type="submit"
@@ -283,6 +290,7 @@ const RegistrationPage = () => {
           </div>
         </form>
 
+        {/* Registration info */}
         <div className="mt-8 bg-white p-5 rounded-xl shadow-sm border border-secondary-100">
           <div className="flex items-start gap-3">
             <div className="text-accent-600">
