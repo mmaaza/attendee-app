@@ -21,7 +21,7 @@ const Header = () => {
   };
 
   return (
-    <header className={`w-full bg-primary-600 py-4 text-white print:hidden`}>
+    <header className={`w-full bg-white py-4 text-primary-600 print:hidden relative z-30 shadow-sm`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <Link to="/" className="text-2xl font-display font-bold tracking-wide flex items-center">
           <span className="text-primary-300">Nep</span>Dent
@@ -48,6 +48,7 @@ const Header = () => {
           className="md:hidden flex items-center p-2"
           onClick={toggleMenu}
           aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
         >
           <svg 
             className="w-6 h-6" 
@@ -76,8 +77,8 @@ const Header = () => {
       
       {/* Mobile Navigation */}
       <div 
-        className={`md:hidden absolute top-full left-0 right-0 bg-primary-700 transition-all duration-300 ease-in-out overflow-hidden ${
-          isMenuOpen ? 'max-h-screen opacity-100 shadow-lg' : 'max-h-0 opacity-0'
+        className={`md:hidden fixed top-[60px] left-0 right-0 bg-white border-t border-gray-200 transition-all duration-300 ease-in-out z-20 ${
+          isMenuOpen ? 'block opacity-100 shadow-lg' : 'hidden opacity-0'
         }`}
       >
         <nav className="px-4 py-2">
@@ -85,7 +86,7 @@ const Header = () => {
             <li>
               <Link 
                 to="/" 
-                className="block py-2 hover:text-primary-300 transition-colors duration-300 font-medium"
+                className="block py-2 hover:text-primary-300 transition-colors duration-300 font-medium text-primary-600"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
@@ -94,7 +95,7 @@ const Header = () => {
             <li>
               <Link 
                 to="/register" 
-                className="block py-2 hover:text-primary-300 transition-colors duration-300 font-medium"
+                className="block py-2 hover:text-primary-300 transition-colors duration-300 font-medium text-primary-600"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Register
