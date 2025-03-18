@@ -5,10 +5,10 @@ import CountdownTimer from '../components/CountdownTimer';
 const HomePage = () => {  
   // Stats for the event
   const stats = [
-    { value: '500+', label: 'Exhibitors', icon: '🏢' },
+    { value: '500+', label: 'Expected Exhibitors', icon: '🏢' },
     { value: '50+', label: 'Countries', icon: '🌎' },
-    { value: '25K+', label: 'Attendees', icon: '👥' },
-    { value: '100+', label: 'Speakers', icon: '🎤' }
+    { value: '25K+', label: 'Expected Attendees', icon: '👥' },
+    { value: '100+', label: 'Renowned Speakers', icon: '🎤' }
   ];
   
   // Featured speakers
@@ -18,10 +18,10 @@ const HomePage = () => {
     { name: 'Dr. Sarah Johnson', role: 'Orthodontics Innovator', image: 'https://randomuser.me/api/portraits/women/3.jpg' },
   ];
   
-  // Testimonials
+  // Testimonials - updated for anticipation rather than past experience
   const testimonials = [
-    { text: "IDS 2023 was absolutely game-changing for my practice. The innovations I discovered there have transformed how we work.", author: "Dr. Michael Stevens", role: "Dental Surgeon" },
-    { text: "The networking opportunities at IDS are unmatched. I've established partnerships that have been instrumental to my career growth.", author: "Dr. Linda Murray", role: "Orthodontist" },
+    { text: "As an industry leader, I'm eagerly looking forward to the first IDS in Nepal. It represents a milestone for dental innovation in the region.", author: "Dr. Michael Stevens", role: "Dental Surgeon" },
+    { text: "The inaugural IDS in Nepal promises unprecedented networking opportunities for dental professionals across Asia and beyond.", author: "Dr. Linda Murray", role: "Orthodontist" },
   ];
 
   return (
@@ -43,7 +43,7 @@ const HomePage = () => {
                 <span className="block">Dental Show 2025</span>
               </h1>
               <p className="mt-3 md:mt-4 text-base md:text-xl text-secondary-600">
-                The world's leading trade fair for cutting-edge dental innovation, professional networking, and industry insights.
+                The inaugural edition of Nepal's premier dental exhibition, bringing together global innovation, professional networking, and industry insights.
               </p>
             </div>
             
@@ -89,8 +89,8 @@ const HomePage = () => {
       {/* Features Grid */}
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Event Highlights</h2>
-          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Discover why IDS 2025 is the most anticipated dental event globally</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">What to Expect</h2>
+          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Join us for the historic first edition of IDS Nepal 2025</p>
         </div>
         
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -101,8 +101,8 @@ const HomePage = () => {
               </svg>
             </div>
             <div className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Latest Innovations</h3>
-              <p className="text-sm md:text-base text-secondary-600">Experience firsthand the cutting-edge technologies transforming the dental industry, from AI diagnostics to 3D printing solutions.</p>
+              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Global Innovations</h3>
+              <p className="text-sm md:text-base text-secondary-600">Be among the first to witness cutting-edge dental technologies making their debut in Nepal, from AI diagnostics to 3D printing solutions.</p>
               <Link to="/innovations" className="mt-3 md:mt-4 inline-flex items-center text-primary-600 hover:text-primary-700 text-sm md:text-base">
                 Learn more
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -119,8 +119,8 @@ const HomePage = () => {
               </svg>
             </div>
             <div className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Networking Events</h3>
-              <p className="text-sm md:text-base text-secondary-600">Connect with peers and industry leaders through structured networking sessions, social events, and specialized matchmaking programs.</p>
+              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Networking Opportunities</h3>
+              <p className="text-sm md:text-base text-secondary-600">Form valuable connections with industry leaders and peers from across Asia and beyond through our carefully designed networking programs.</p>
               <Link to="/networking" className="mt-3 md:mt-4 inline-flex items-center text-accent-600 hover:text-accent-700 text-sm md:text-base">
                 Learn more
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -137,8 +137,8 @@ const HomePage = () => {
               </svg>
             </div>
             <div className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Educational Programs</h3>
-              <p className="text-sm md:text-base text-secondary-600">Enhance your skills with comprehensive workshops, seminars, and hands-on training sessions led by internationally recognized experts.</p>
+              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Knowledge Exchange</h3>
+              <p className="text-sm md:text-base text-secondary-600">Participate in groundbreaking workshops, seminars, and hands-on training sessions led by internationally recognized dental experts.</p>
               <Link to="/education" className="mt-3 md:mt-4 inline-flex items-center text-success hover:text-green-600 text-sm md:text-base">
                 Learn more
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
@@ -188,11 +188,11 @@ const HomePage = () => {
         </div>
       </div>
       
-      {/* Testimonials */}
+      {/* Testimonials - Updated for anticipation */}
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">What Attendees Say</h2>
-          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Hear from professionals who've experienced the impact of IDS</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Industry Excitement</h2>
+          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Hear what dental professionals are saying about the first-ever IDS in Nepal</p>
         </div>
         
         <div className="grid gap-6 md:gap-8 md:grid-cols-2">
@@ -225,8 +225,8 @@ const HomePage = () => {
         </div>
         
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6 font-display">Secure Your Place at the World's Premier Dental Event</h2>
-          <p className="text-base md:text-xl text-primary-100 mb-6 md:mb-8">April 18-20, 2025 • Koelnmesse, Cologne, Germany</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6 font-display">Be Part of Dental History in Nepal</h2>
+          <p className="text-base md:text-xl text-primary-100 mb-6 md:mb-8">April 18-20, 2025 • Kathmandu, Nepal</p>
           <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-4">
             <Link to="/register" className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 text-base md:text-lg font-medium rounded-xl bg-white text-primary-700 shadow-lg hover:bg-primary-50 transition-colors">
               Register Now
@@ -265,7 +265,7 @@ const HomePage = () => {
                 </div>
                 <div>
                   <dt className="font-semibold text-secondary-900">Venue</dt>
-                  <dd className="text-sm md:text-base text-secondary-600">Koelnmesse, Cologne, Germany</dd>
+                  <dd className="text-sm md:text-base text-secondary-600">Kathmandu Exhibition Center, Nepal</dd>
                 </div>
               </div>
               
@@ -284,7 +284,7 @@ const HomePage = () => {
           </div>
           
           <div className="rounded-xl overflow-hidden shadow-lg border border-secondary-200 h-60 md:h-80 bg-secondary-100 mt-4 md:mt-0">
-            <div className="w-full h-full bg-center bg-cover" style={{backgroundImage: "url('https://maps.googleapis.com/maps/api/staticmap?center=Koelnmesse,Cologne,Germany&zoom=14&size=600x400&markers=Koelnmesse,Cologne,Germany&key=YOUR_API_KEY')"}}>
+            <div className="w-full h-full bg-center bg-cover" style={{backgroundImage: "url('https://maps.googleapis.com/maps/api/staticmap?center=Kathmandu,Nepal&zoom=14&size=600x400&markers=Kathmandu,Nepal&key=YOUR_API_KEY')"}}>
               <div className="w-full h-full flex items-center justify-center bg-secondary-200">
                 <span className="text-secondary-600 text-sm md:text-base">Event Location Map</span>
               </div>
