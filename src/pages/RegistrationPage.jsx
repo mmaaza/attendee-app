@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { db } from '../../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { QRCodeSVG } from 'qrcode.react'; // Fix: correct import for qrcode.react
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
@@ -80,21 +81,35 @@ const RegistrationPage = () => {
     const loadingToast = toast.loading('Processing your registration...');
 
     try {
-      // Save data to Firestore
+      // Generate a custom document ID
+      const customId = `NEPDENT-${Math.floor(10000 + Math.random() * 90000)}`;
+
+      // Save data to Firestore with custom ID
       const docRef = await addDoc(collection(db, 'users'), {
         ...formData,
-        createdAt: new Date() // Add a timestamp
+        createdAt: new Date(), // Add a timestamp
+        uid: customId // Add custom UID
+      });
+
+      // Generate QR code URL with the Firestore document ID
+      const qrCodeUrl = `http://192.168.1.10:5173/check-in/${docRef.id}`;
+      
+      // Update the document with the QR code URL
+      await updateDoc(doc(db, 'users', docRef.id), {
+        qrCodeUrl: qrCodeUrl
       });
 
       // Dismiss loading toast and show success message
       toast.dismiss(loadingToast);
       toast.success('Registration successful! Redirecting to confirmation page...');
 
-      // Navigate to confirmation page with Firestore-generated ID
+      // Navigate to confirmation page with custom ID and QR code URL
       navigate('/registration-confirmation', {
         state: {
           ...formData,
-          attendeeId: docRef.id // Use Firestore document ID as attendee ID
+          attendeeId: customId, // Use custom ID as attendee ID
+          documentId: docRef.id, // Pass the Firestore document ID
+          qrCodeUrl: qrCodeUrl // Pass QR code URL to confirmation page
         }
       });
     } catch (error) {

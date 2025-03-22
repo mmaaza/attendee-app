@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import AdminLayout from './components/AdminLayout';
 import HomePage from './pages/HomePage';
@@ -7,12 +7,13 @@ import RegistrationConfirmationPage from './pages/RegistrationConfirmationPage';
 import DigitalPassPage from './pages/DigitalPassPage';
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
+import CheckInPage from './pages/CheckInPage';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       {/* Global Toast container */}
       <Toaster 
         position="top-right"
@@ -61,6 +62,7 @@ function App() {
           <Route path="register" element={<RegistrationPage />} />
           <Route path="registration-confirmation" element={<RegistrationConfirmationPage />} />
           <Route path="digital-pass" element={<DigitalPassPage />} />
+          <Route path="check-in/:id" element={<CheckInPage />} />
         </Route>
         
         {/* Admin Routes */}
@@ -72,7 +74,7 @@ function App() {
           </Route>
         </Route>
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
