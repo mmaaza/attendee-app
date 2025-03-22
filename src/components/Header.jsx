@@ -41,6 +41,11 @@ const Header = () => {
                 Register
               </Link>
             </li>
+            <li>
+              <Link to="/verify-registration" className="hover:text-primary-300 transition-colors duration-300 font-medium">
+                Verify Registration
+              </Link>
+            </li>
           </ul>
         </nav>
         
@@ -100,6 +105,15 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Register
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/verify-registration" 
+                className="block py-2 hover:text-primary-300 transition-colors duration-300 font-medium text-primary-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Verify Registration
               </Link>
             </li>
           </ul>

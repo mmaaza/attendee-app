@@ -4,6 +4,7 @@ import AdminLayout from './components/AdminLayout';
 import HomePage from './pages/HomePage';
 import RegistrationPage from './pages/RegistrationPage';
 import RegistrationConfirmationPage from './pages/RegistrationConfirmationPage';
+import VerifyRegistrationPage from './pages/VerifyRegistrationPage';
 import DigitalPassPage from './pages/DigitalPassPage';
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
@@ -64,6 +65,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="register" element={<RegistrationPage />} />
           <Route path="registration-confirmation" element={<RegistrationConfirmationPage />} />
+          <Route path="verify-registration" element={<VerifyRegistrationPage />} />
           <Route path="digital-pass" element={<DigitalPassPage />} />
           <Route path="check-in/:id" element={<CheckInPage />} />
         </Route>
