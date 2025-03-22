@@ -8,6 +8,8 @@ import DigitalPassPage from './pages/DigitalPassPage';
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import CheckInPage from './pages/CheckInPage';
+import HomePageContentPage from './pages/admin/HomePageContentPage';
+import AuthGuard from './components/AuthGuard';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -68,9 +70,13 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin">
           <Route index element={<AdminLoginPage />} />
-          <Route element={<AdminLayout />}>
+          <Route element={
+            <AuthGuard>
+              <AdminLayout />
+            </AuthGuard>
+          }>
             <Route path="dashboard" element={<AdminDashboardPage />} />
-            {/* Add other admin routes here */}
+            <Route path="homepage-content" element={<HomePageContentPage />} />
           </Route>
         </Route>
       </Routes>
