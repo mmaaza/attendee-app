@@ -9,6 +9,7 @@ import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import CheckInPage from './pages/CheckInPage';
 import HomePageContentPage from './pages/admin/HomePageContentPage';
+import SettingsPage from './pages/admin/SettingsPage';
 import AuthGuard from './components/AuthGuard';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
@@ -77,6 +78,7 @@ function App() {
           }>
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="homepage-content" element={<HomePageContentPage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Route>
       </Routes>
