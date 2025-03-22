@@ -6,7 +6,7 @@ import procareLogo from "../assets/procare-logo.png";
 
 const RegistrationConfirmationPage = () => {
   const location = useLocation();
-  const { firstName, lastName, email, attendeeId, documentId, qrCodeUrl } =
+  const { fullName, email, mobileNumber, attendeeId, documentId, qrCodeUrl } =
     location.state || {};
   const [registrationData, setRegistrationData] = useState(null);
 
@@ -77,9 +77,12 @@ const RegistrationConfirmationPage = () => {
           <div className="bg-secondary-50 p-6 rounded-xl mb-8">
             <div className="mb-4">
               <p className="text-sm text-secondary-500">Attendee Name</p>
-              <p className="font-medium text-secondary-900">
-                {firstName} {lastName}
-              </p>
+              <p className="font-medium text-secondary-900">{fullName}</p>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-secondary-500">Mobile Number</p>
+              <p className="font-medium text-secondary-900">{mobileNumber}</p>
             </div>
 
             <div className="mb-4">
@@ -136,7 +139,7 @@ const RegistrationConfirmationPage = () => {
               <div className="text-center">
                 <div className="text-xs text-secondary-500">Attendee</div>
                 <div className="text-sm font-bold text-secondary-900 mb-2">
-                  {firstName} {lastName}
+                  {fullName}
                 </div>
                 
                 <div className="text-xs text-secondary-500">ID</div>

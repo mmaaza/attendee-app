@@ -1,21 +1,142 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { db } from '../../firebase';
-import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { QRCodeSVG } from 'qrcode.react'; // Fix: correct import for qrcode.react
+
+// Countries data
+const countries = [
+  "Nepal", "India", "Germany", "United States", "United Kingdom", "France", "China", "Japan", 
+  "Australia", "Canada", "Brazil", "South Africa", "Russia", "Italy", "Spain", "Singapore", 
+  "Malaysia", "Thailand", "South Korea", "Other"
+].sort();
+
+// SearchableDropdown Component
+const SearchableDropdown = ({ value, onChange, onBlur }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef(null);
+  const searchRef = useRef(null);
+
+  const filteredCountries = countries.filter(country =>
+    country.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelect = (country) => {
+    onChange({ target: { name: 'country', value: country } });
+    setIsOpen(false);
+    setSearchTerm('');
+    if (onBlur) onBlur();
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <div
+        className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus-within:ring-2 focus-within:ring-primary-300 focus-within:border-primary-300 transition-colors bg-white cursor-pointer"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) {
+            setTimeout(() => searchRef.current?.focus(), 100);
+          }
+        }}
+      >
+        <div className="flex justify-between items-center">
+          <span className={value ? 'text-secondary-900' : 'text-secondary-400'}>
+            {value || 'Select your country'}
+          </span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-5 w-5 text-secondary-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+      </div>
+
+      {/* Dropdown Panel */}
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-secondary-200 rounded-xl shadow-lg max-h-60 overflow-hidden">
+          <div className="p-2 border-b border-secondary-100">
+            <input
+              ref={searchRef}
+              type="text"
+              className="w-full px-3 py-2 text-sm border border-secondary-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300"
+              placeholder="Search countries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+          <div className="overflow-y-auto max-h-48">
+            {filteredCountries.length > 0 ? (
+              filteredCountries.map((country) => (
+                <div
+                  key={country}
+                  className={`px-4 py-2 cursor-pointer text-sm hover:bg-primary-50 transition-colors ${
+                    value === country ? 'bg-primary-50 text-primary-600' : 'text-secondary-700'
+                  }`}
+                  onClick={() => handleSelect(country)}
+                >
+                  {country}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-secondary-500">No countries found</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
+  const [interests, setInterests] = useState([]);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
+    mobileNumber: '',
     company: '',
     jobTitle: '',
     country: '',
     interests: []
   });
+
+  // Fetch available interests from Firestore
+  useEffect(() => {
+    const fetchInterests = async () => {
+      try {
+        const interestsDoc = await getDoc(doc(db, 'settings', 'interests'));
+        if (interestsDoc.exists()) {
+          setInterests(interestsDoc.data().list || []);
+        }
+      } catch (error) {
+        console.error('Error fetching interests:', error);
+        toast.error('Failed to load interests');
+      }
+    };
+
+    fetchInterests();
+  }, []);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -43,12 +164,12 @@ const RegistrationPage = () => {
     e.preventDefault();
 
     // Form validation
-    if (!formData.firstName.trim()) {
-      toast.error('Please enter your first name');
+    if (!formData.fullName.trim()) {
+      toast.error('Please enter your full name');
       return;
     }
-    if (!formData.lastName.trim()) {
-      toast.error('Please enter your last name');
+    if (!formData.mobileNumber.trim()) {
+      toast.error('Please enter your mobile number');
       return;
     }
     if (!formData.email.trim()) {
@@ -96,7 +217,7 @@ const RegistrationPage = () => {
         type: 'NEW_REGISTRATION',
         userId: docRef.id,
         title: 'New Registration',
-        message: `${formData.firstName} ${formData.lastName} from ${formData.company} has registered`,
+        message: `${formData.fullName} from ${formData.company} has registered`,
         timestamp: new Date(),
         isRead: false,
         metadata: {
@@ -145,7 +266,7 @@ const RegistrationPage = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-10">
           <h1 className="font-display text-4xl md:text-5xl font-bold text-secondary-900 mb-2">
-            Register for NepDent IDS 2025
+            Register for NEPDENT DTS 2025
           </h1>
           <p className="text-secondary-600 text-lg max-w-2xl mx-auto">
             Join us in Kathmandu on April 18-20, 2025 for the premier dental event in Nepal
@@ -159,38 +280,38 @@ const RegistrationPage = () => {
           className="bg-white rounded-2xl shadow-card border border-secondary-100 p-6 md:p-8 transition-all duration-300 hover:shadow-xl"
         >
           <div className="grid md:grid-cols-2 gap-6">
-            {/* First Name */}
+            {/* Full Name */}
             <div>
-              <label htmlFor="firstName" className="block text-sm font-semibold text-secondary-700 mb-1">
-                First Name *
+              <label htmlFor="fullName" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Full Name *
               </label>
               <input
                 type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
-                placeholder="Your first name"
+                placeholder="Your full name"
                 autoComplete="off"
               />
             </div>
 
-            {/* Last Name */}
+            {/* Mobile Number */}
             <div>
-              <label htmlFor="lastName" className="block text-sm font-semibold text-secondary-700 mb-1">
-                Last Name *
+              <label htmlFor="mobileNumber" className="block text-sm font-semibold text-secondary-700 mb-1">
+                Mobile Number *
               </label>
               <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
+                type="tel"
+                id="mobileNumber"
+                name="mobileNumber"
+                value={formData.mobileNumber}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors"
-                placeholder="Your last name"
+                placeholder="Your mobile number"
                 autoComplete="off"
               />
             </div>
@@ -254,30 +375,11 @@ const RegistrationPage = () => {
               <label htmlFor="country" className="block text-sm font-semibold text-secondary-700 mb-1">
                 Country *
               </label>
-              <div className="relative">
-                <select
-                  id="country"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  required
-                  className="appearance-none w-full px-4 py-3 border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors bg-white pr-10"
-                >
-                  <option value="">Select your country</option>
-                  <option value="Nepal">Nepal</option>
-                  <option value="India">India</option>
-                  <option value="Germany">Germany</option>
-                  <option value="United States">United States</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="France">France</option>
-                  <option value="Other">Other</option>
-                </select>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
+              <SearchableDropdown
+                value={formData.country}
+                onChange={handleChange}
+                onBlur={() => {}}
+              />
             </div>
           </div>
 
@@ -286,20 +388,27 @@ const RegistrationPage = () => {
             <p className="block text-sm font-semibold text-secondary-700 mb-3">Areas of Interest (select all that apply)</p>
             <div className="bg-secondary-50 p-5 rounded-xl border border-secondary-100">
               <div className="grid md:grid-cols-2 gap-4">
-                {['Dental Equipment', 'Materials', 'Technology', 'Preventive Care', 'Aesthetics', 'Oral Surgery', 'Digital Dentistry', 'Education'].map(interest => (
-                  <div key={interest} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={interest}
-                      name="interests"
-                      value={interest}
-                      checked={formData.interests.includes(interest)}
-                      onChange={handleCheckbox}
-                      className="h-5 w-5 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded transition-colors"
-                    />
-                    <label htmlFor={interest} className="ml-3 text-secondary-700 hover:text-primary-600 transition-colors">
-                      {interest}
-                    </label>
+                {interests.map(interest => (
+                  <div key={interest} className="group relative flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        type="checkbox"
+                        id={interest}
+                        name="interests"
+                        value={interest}
+                        checked={formData.interests.includes(interest)}
+                        onChange={handleCheckbox}
+                        className="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-2 focus:ring-primary-300 focus:border-primary-300 transition-colors cursor-pointer"
+                      />
+                    </div>
+                    <div className="ml-2 flex items-center">
+                      <label 
+                        htmlFor={interest} 
+                        className="text-secondary-700 group-hover:text-primary-600 transition-colors cursor-pointer text-sm"
+                      >
+                        {interest}
+                      </label>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -60,7 +60,7 @@ const HomePage = () => {
                 April 18-20, 2025 • Kathmandu, Nepal
               </span>
               <h1 className="mt-3 md:mt-4 text-3xl md:text-5xl font-display font-bold tracking-tight text-secondary-900 sm:text-6xl">
-                <span className="block text-primary-600">NepDent Dental Trade</span>
+                <span className="block text-primary-600">NEPDENT Dental Trade</span>
                 <span className="block">Show 2025</span>
               </h1>
               <p className="mt-3 md:mt-4 text-base md:text-xl text-secondary-600">
@@ -110,7 +110,7 @@ const HomePage = () => {
       {/* Brands Section */}
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Featured Brands</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Featured Exhibitors</h2>
           <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Meet our esteemed exhibitors at DTS Nepal 2025</p>
         </div>
         

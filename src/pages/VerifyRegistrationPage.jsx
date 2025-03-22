@@ -54,8 +54,9 @@ const VerifyRegistrationPage = () => {
       const userData = querySnapshot.docs[0].data();
       const formattedData = {
         id: userData.uid,
-        name: `${userData.firstName} ${userData.lastName}`,
+        name: userData.fullName,
         email: userData.email,
+        mobileNumber: userData.mobileNumber,
         company: userData.company,
         jobTitle: userData.jobTitle,
         country: userData.country,
@@ -165,6 +166,14 @@ const VerifyRegistrationPage = () => {
                         </dt>
                         <dd className="mt-0.5 sm:mt-1 text-base sm:text-lg text-secondary-900">
                           {verifiedData.name}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs sm:text-sm font-medium text-secondary-600">
+                          Mobile Number
+                        </dt>
+                        <dd className="mt-0.5 sm:mt-1 text-base sm:text-lg text-secondary-900">
+                          {verifiedData.mobileNumber}
                         </dd>
                       </div>
                       <div>
