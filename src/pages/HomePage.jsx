@@ -13,15 +13,15 @@ const HomePage = () => {
   
   // Featured speakers
   const speakers = [
-    { name: 'Dr. Emma Wilson', role: 'Digital Dentistry Expert', image: 'https://randomuser.me/api/portraits/women/1.jpg' },
-    { name: 'Dr. James Chen', role: 'Implantology Specialist', image: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    { name: 'Dr. Sarah Johnson', role: 'Orthodontics Innovator', image: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    { name: 'Dr. Emma Wilson', role: 'Digital Dentistry Expert', image: 'https://images.pexels.com/photos/6194365/pexels-photo-6194365.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { name: 'Dr. James Chen', role: 'Implantology Specialist', image: 'https://images.pexels.com/photos/6274712/pexels-photo-6274712.jpeg?auto=compress&cs=tinysrgb&w=600' },
+    { name: 'Dr. Sarah Johnson', role: 'Orthodontics Innovator', image: 'https://images.pexels.com/photos/6608313/pexels-photo-6608313.jpeg?auto=compress&cs=tinysrgb&w=600' },
   ];
   
   // Testimonials - updated for anticipation rather than past experience
   const testimonials = [
-    { text: "As an industry leader, I'm eagerly looking forward to the first IDS in Nepal. It represents a milestone for dental innovation in the region.", author: "Dr. Michael Stevens", role: "Dental Surgeon" },
-    { text: "The inaugural IDS in Nepal promises unprecedented networking opportunities for dental professionals across Asia and beyond.", author: "Dr. Linda Murray", role: "Orthodontist" },
+    { text: "As an industry leader, I'm eagerly looking forward to the first DTS in Nepal. It represents a milestone for dental innovation in the region.", author: "Dr. Michael Stevens", role: "Dental Surgeon" },
+    { text: "The inaugural DTS in Nepal promises unprecedented networking opportunities for dental professionals across Asia and beyond.", author: "Dr. Linda Murray", role: "Orthodontist" },
   ];
 
   return (
@@ -39,8 +39,8 @@ const HomePage = () => {
                 April 18-20, 2025 • Kathmandu, Nepal
               </span>
               <h1 className="mt-3 md:mt-4 text-3xl md:text-5xl font-display font-bold tracking-tight text-secondary-900 sm:text-6xl">
-                <span className="block text-primary-600">International</span>
-                <span className="block">Dental Show 2025</span>
+                <span className="block text-primary-600">Dental Trade</span>
+                <span className="block">Show 2025</span>
               </h1>
               <p className="mt-3 md:mt-4 text-base md:text-xl text-secondary-600">
                 The inaugural edition of Nepal's premier dental exhibition, bringing together global innovation, professional networking, and industry insights.
@@ -90,7 +90,7 @@ const HomePage = () => {
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">What to Expect</h2>
-          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Join us for the historic first edition of IDS Nepal 2025</p>
+          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Join us for the historic first edition of DTS Nepal 2025</p>
         </div>
         
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,7 +192,7 @@ const HomePage = () => {
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Industry Excitement</h2>
-          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Hear what dental professionals are saying about the first-ever IDS in Nepal</p>
+          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Hear what dental professionals are saying about the first-ever DTS in Nepal</p>
         </div>
         
         <div className="grid gap-6 md:gap-8 md:grid-cols-2">

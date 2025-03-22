@@ -1,9 +1,12 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import AdminLayout from './components/AdminLayout';
 import HomePage from './pages/HomePage';
 import RegistrationPage from './pages/RegistrationPage';
 import RegistrationConfirmationPage from './pages/RegistrationConfirmationPage';
 import DigitalPassPage from './pages/DigitalPassPage';
+import AdminLoginPage from './pages/admin/LoginPage';
+import AdminDashboardPage from './pages/admin/DashboardPage';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
 
@@ -52,11 +55,21 @@ function App() {
         }}
       />
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="register" element={<RegistrationPage />} />
           <Route path="registration-confirmation" element={<RegistrationConfirmationPage />} />
           <Route path="digital-pass" element={<DigitalPassPage />} />
+        </Route>
+        
+        {/* Admin Routes */}
+        <Route path="/admin">
+          <Route index element={<AdminLoginPage />} />
+          <Route element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            {/* Add other admin routes here */}
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -50,7 +50,7 @@ const RegistrationConfirmationPage = () => {
             </svg>
           </div>
           <h1 className="text-3xl font-bold font-display text-secondary-900 mb-2">Registration Complete!</h1>
-          <p className="text-secondary-700 text-lg">Thank you for registering for the NepDent International Dental Show 2025</p>
+          <p className="text-secondary-700 text-lg">Thank you for registering for the Dental Trade Show 2025</p>
           <div className="flex items-center justify-center mt-4 text-sm text-secondary-600 space-x-4">
             <div className="flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

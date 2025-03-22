@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import logo from '../assets/logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,7 +25,7 @@ const Header = () => {
     <header className={`w-full bg-white py-4 text-primary-600 print:hidden relative z-30 shadow-sm`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <Link to="/" className="text-2xl font-display font-bold tracking-wide flex items-center">
-          <span className="text-primary-300">Nep</span>Dent
+          <img src={logo} alt="Nepdent Logo" className="w-[100px] h-auto" />
         </Link>
         
         {/* Desktop Navigation */}

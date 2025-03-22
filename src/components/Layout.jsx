@@ -11,7 +11,7 @@ const Layout = () => {
       </main>
       <footer className="bg-gray-800 text-white p-4 print:hidden">
         <div className="container mx-auto">
-          <p className="text-center">© {new Date().getFullYear()} International Dental Show 2025. All rights reserved.</p>
+          <p className="text-center">© {new Date().getFullYear()} Dental Trade Show 2025. All rights reserved.</p>
         </div>
       </footer>
     </div>

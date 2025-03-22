@@ -70,7 +70,7 @@ const DigitalPassPage = () => {
         <div className="bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100 print:border-neutral-700 print:shadow-none">
           {/* Event name at the top */}
           <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white p-6 text-center">
-            <h2 className="text-xl font-display font-bold print:text-black">NepDent International Dental Show 2025</h2>
+            <h2 className="text-xl font-display font-bold print:text-black">Dental Trade Show 2025</h2>
             <div className="flex items-center justify-center mt-2 text-sm text-primary-100 space-x-4">
               <div className="flex items-center print:text-neutral-700">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
