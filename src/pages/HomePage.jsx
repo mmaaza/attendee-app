@@ -231,9 +231,6 @@ const HomePage = () => {
             <Link to="/register" className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 text-base md:text-lg font-medium rounded-xl bg-white text-primary-700 shadow-lg hover:bg-primary-50 transition-colors">
               Register Now
             </Link>
-            <Link to="/program" className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 text-base md:text-lg font-medium rounded-xl border-2 border-white text-white hover:bg-white/10 transition-colors">
-              View Full Program
-            </Link>
           </div>
         </div>
       </div>

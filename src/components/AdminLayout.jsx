@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { auth } from '../../firebase';
+import { signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
 
 const AdminLayout = () => {
@@ -7,10 +9,15 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // TODO: Implement actual logout logic
-    toast.success('Logged out successfully');
-    navigate('/admin');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast.success('Logged out successfully');
+      navigate('/admin');
+    } catch (error) {
+      toast.error('Error logging out');
+      console.error('Logout error:', error);
+    }
   };
 
   const navigationItems = [
