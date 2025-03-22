@@ -1,28 +1,49 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { collection, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import CountdownTimer from '../components/CountdownTimer';
 
 const HomePage = () => {  
-  // Stats for the event
-  const stats = [
-    { value: '500+', label: 'Expected Exhibitors', icon: '🏢' },
-    { value: '50+', label: 'Countries', icon: '🌎' },
-    { value: '25K+', label: 'Expected Attendees', icon: '👥' },
-    { value: '100+', label: 'Renowned Speakers', icon: '🎤' }
-  ];
-  
-  // Featured speakers
-  const speakers = [
-    { name: 'Dr. Emma Wilson', role: 'Digital Dentistry Expert', image: 'https://images.pexels.com/photos/6194365/pexels-photo-6194365.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { name: 'Dr. James Chen', role: 'Implantology Specialist', image: 'https://images.pexels.com/photos/6274712/pexels-photo-6274712.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { name: 'Dr. Sarah Johnson', role: 'Orthodontics Innovator', image: 'https://images.pexels.com/photos/6608313/pexels-photo-6608313.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  ];
-  
-  // Testimonials - updated for anticipation rather than past experience
-  const testimonials = [
-    { text: "As an industry leader, I'm eagerly looking forward to the first DTS in Nepal. It represents a milestone for dental innovation in the region.", author: "Dr. Michael Stevens", role: "Dental Surgeon" },
-    { text: "The inaugural DTS in Nepal promises unprecedented networking opportunities for dental professionals across Asia and beyond.", author: "Dr. Linda Murray", role: "Orthodontist" },
-  ];
+  const [content, setContent] = useState({
+    stats: [
+      { value: '500+', label: 'Expected Exhibitors', icon: '🏢' },
+      { value: '50+', label: 'Countries', icon: '🌎' },
+      { value: '25K+', label: 'Expected Attendees', icon: '👥' },
+      { value: '100+', label: 'Renowned Speakers', icon: '🎤' }
+    ],
+    speakers: [],
+    testimonials: [],
+    brands: [],
+    eventDetails: {
+      venue: 'Kathmandu Exhibition Center, Nepal',
+      hours: '9:00 AM - 6:00 PM Daily',
+    }
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const docRef = doc(collection(db, 'content'), 'homepage');
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setContent(prevContent => ({
+          ...prevContent,
+          ...data
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-primary-50 to-secondary-100">
@@ -39,7 +60,7 @@ const HomePage = () => {
                 April 18-20, 2025 • Kathmandu, Nepal
               </span>
               <h1 className="mt-3 md:mt-4 text-3xl md:text-5xl font-display font-bold tracking-tight text-secondary-900 sm:text-6xl">
-                <span className="block text-primary-600">Dental Trade</span>
+                <span className="block text-primary-600">NepDent Dental Trade</span>
                 <span className="block">Show 2025</span>
               </h1>
               <p className="mt-3 md:mt-4 text-base md:text-xl text-secondary-600">
@@ -76,7 +97,7 @@ const HomePage = () => {
       {/* Stats Section */}
       <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-          {stats.map((stat, index) => (
+          {content.stats.map((stat, index) => (
             <div key={index} className="bg-white p-4 md:p-6 rounded-xl shadow-card hover:shadow-xl transition-shadow duration-300 border border-secondary-100 transform hover:-translate-y-1">
               <div className="text-2xl md:text-4xl mb-2 md:mb-3">{stat.icon}</div>
               <div className="text-xl md:text-3xl font-bold text-primary-700">{stat.value}</div>
@@ -86,67 +107,54 @@ const HomePage = () => {
         </div>
       </div>
       
-      {/* Features Grid */}
+      {/* Brands Section */}
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">What to Expect</h2>
-          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Join us for the historic first edition of DTS Nepal 2025</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Featured Brands</h2>
+          <p className="max-w-2xl mx-auto text-sm md:text-base text-secondary-600">Meet our esteemed exhibitors at DTS Nepal 2025</p>
         </div>
         
         <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="bg-white rounded-xl overflow-hidden shadow-card group hover:shadow-xl transition-all duration-300">
-            <div className="h-36 md:h-48 bg-primary-600 flex items-center justify-center group-hover:bg-primary-700 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 md:h-16 md:w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+          {isLoading ? (
+            // Loading skeletons for brands
+            [...Array(3)].map((_, index) => (
+              <div key={index} className="bg-white rounded-xl overflow-hidden shadow-card animate-pulse border border-secondary-100">
+                <div className="aspect-w-16 aspect-h-9">
+                  <div className="w-full h-48 bg-secondary-200"></div>
+                </div>
+                <div className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 bg-secondary-200 rounded w-1/3"></div>
+                    <div className="h-4 bg-secondary-200 rounded w-1/4"></div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : content.brands.length > 0 ? (
+            content.brands.map((brand, index) => (
+              <div key={index} className="bg-white rounded-xl overflow-hidden shadow-card group hover:shadow-xl transition-all duration-300 border border-secondary-100">
+                <div className="aspect-w-16 aspect-h-9">
+                  <img 
+                    src={brand.image} 
+                    alt={brand.name}
+                    className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg md:text-xl font-bold text-secondary-900">{brand.name}</h3>
+                    <span className="inline-block px-3 py-1 bg-primary-50 text-primary-700 rounded-lg font-semibold text-sm">
+                      Booth #{brand.boothNumber}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-secondary-600">Exhibitor list will be announced soon.</p>
             </div>
-            <div className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Global Innovations</h3>
-              <p className="text-sm md:text-base text-secondary-600">Be among the first to witness cutting-edge dental technologies making their debut in Nepal, from AI diagnostics to 3D printing solutions.</p>
-              <Link to="/innovations" className="mt-3 md:mt-4 inline-flex items-center text-primary-600 hover:text-primary-700 text-sm md:text-base">
-                Learn more
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl overflow-hidden shadow-card group hover:shadow-xl transition-all duration-300">
-            <div className="h-36 md:h-48 bg-accent-500 flex items-center justify-center group-hover:bg-accent-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 md:h-16 md:w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
-            <div className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Networking Opportunities</h3>
-              <p className="text-sm md:text-base text-secondary-600">Form valuable connections with industry leaders and peers from across Asia and beyond through our carefully designed networking programs.</p>
-              <Link to="/networking" className="mt-3 md:mt-4 inline-flex items-center text-accent-600 hover:text-accent-700 text-sm md:text-base">
-                Learn more
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl overflow-hidden shadow-card group hover:shadow-xl transition-all duration-300 sm:col-span-2 lg:col-span-1">
-            <div className="h-36 md:h-48 bg-success flex items-center justify-center group-hover:bg-green-600 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 md:h-16 md:w-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-            </div>
-            <div className="p-4 md:p-6">
-              <h3 className="text-lg md:text-xl font-bold text-secondary-900 mb-2">Knowledge Exchange</h3>
-              <p className="text-sm md:text-base text-secondary-600">Participate in groundbreaking workshops, seminars, and hands-on training sessions led by internationally recognized dental experts.</p>
-              <Link to="/education" className="mt-3 md:mt-4 inline-flex items-center text-success hover:text-green-600 text-sm md:text-base">
-                Learn more
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </div>
       
@@ -159,36 +167,55 @@ const HomePage = () => {
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-            {speakers.map((speaker, index) => (
-              <div key={index} className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-300 group">
-                <div className="relative h-56 md:h-64 overflow-hidden">
-                  <img 
-                    src={speaker.image} 
-                    alt={speaker.name}
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-secondary-900 to-transparent opacity-60"></div>
-                  <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 right-3 md:right-4 text-white">
-                    <h3 className="font-bold text-lg md:text-xl">{speaker.name}</h3>
-                    <p className="text-sm md:text-base">{speaker.role}</p>
+            {isLoading ? (
+              // Loading skeletons
+              [...Array(3)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl overflow-hidden shadow-card animate-pulse">
+                  <div className="relative h-56 md:h-64 bg-secondary-200"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-secondary-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-secondary-200 rounded w-1/2"></div>
                   </div>
                 </div>
+              ))
+            ) : content.speakers.length > 0 ? (
+              content.speakers.map((speaker, index) => (
+                <div key={index} className="bg-white rounded-xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-300 group">
+                  <div className="relative h-56 md:h-64 overflow-hidden">
+                    <img 
+                      src={speaker.image} 
+                      alt={speaker.name}
+                      className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-secondary-900 to-transparent opacity-60"></div>
+                    <div className="absolute bottom-3 md:bottom-4 left-3 md:left-4 right-3 md:right-4 text-white">
+                      <h3 className="font-bold text-lg md:text-xl">{speaker.name}</h3>
+                      <p className="text-sm md:text-base">{speaker.role}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-secondary-600">Speakers will be announced soon.</p>
               </div>
-            ))}
+            )}
           </div>
           
-          <div className="text-center mt-8 md:mt-10">
-            <Link to="/speakers" className="inline-flex items-center px-4 py-2 md:px-6 md:py-3 text-sm md:text-base border border-secondary-300 rounded-xl text-secondary-700 hover:bg-secondary-100 transition-colors">
-              View All Speakers
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </Link>
-          </div>
+          {content.speakers.length > 0 && (
+            <div className="text-center mt-8 md:mt-10">
+              <Link to="/speakers" className="inline-flex items-center px-4 py-2 md:px-6 md:py-3 text-sm md:text-base border border-secondary-300 rounded-xl text-secondary-700 hover:bg-secondary-100 transition-colors">
+                View All Speakers
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
       
-      {/* Testimonials - Updated for anticipation */}
+      {/* Testimonials Section */}
       <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 sm:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-secondary-900 mb-3 md:mb-4 font-display">Industry Excitement</h2>
@@ -196,18 +223,40 @@ const HomePage = () => {
         </div>
         
         <div className="grid gap-6 md:gap-8 md:grid-cols-2">
-          {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-white p-5 md:p-8 rounded-xl shadow-card border border-secondary-100 relative">
-              <div className="absolute top-3 md:top-4 left-3 md:left-4 text-4xl md:text-5xl text-primary-200">"</div>
-              <div className="relative z-10 pt-4 md:pt-0">
-                <p className="text-base md:text-lg text-secondary-700 mb-4 md:mb-6">{testimonial.text}</p>
-                <div>
-                  <p className="font-bold text-secondary-900">{testimonial.author}</p>
-                  <p className="text-sm md:text-base text-secondary-600">{testimonial.role}</p>
+          {isLoading ? (
+            // Loading skeletons for testimonials
+            [...Array(2)].map((_, index) => (
+              <div key={index} className="bg-white p-5 md:p-8 rounded-xl shadow-card border border-secondary-100 relative animate-pulse">
+                <div className="absolute top-3 md:top-4 left-3 md:left-4 text-4xl md:text-5xl text-primary-200">"</div>
+                <div className="relative z-10 pt-4 md:pt-0">
+                  <div className="h-4 bg-secondary-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-secondary-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-secondary-200 rounded w-2/3 mb-6"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-secondary-200 rounded w-1/3"></div>
+                    <div className="h-3 bg-secondary-200 rounded w-1/4"></div>
+                  </div>
                 </div>
               </div>
+            ))
+          ) : content.testimonials.length > 0 ? (
+            content.testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-white p-5 md:p-8 rounded-xl shadow-card border border-secondary-100 relative">
+                <div className="absolute top-3 md:top-4 left-3 md:left-4 text-4xl md:text-5xl text-primary-200">"</div>
+                <div className="relative z-10 pt-4 md:pt-0">
+                  <p className="text-base md:text-lg text-secondary-700 mb-4 md:mb-6">{testimonial.text}</p>
+                  <div>
+                    <p className="font-bold text-secondary-900">{testimonial.author}</p>
+                    <p className="text-sm md:text-base text-secondary-600">{testimonial.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-secondary-600">Testimonials will be added soon.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
       
@@ -262,7 +311,7 @@ const HomePage = () => {
                 </div>
                 <div>
                   <dt className="font-semibold text-secondary-900">Venue</dt>
-                  <dd className="text-sm md:text-base text-secondary-600">Kathmandu Exhibition Center, Nepal</dd>
+                  <dd className="text-sm md:text-base text-secondary-600">{content.eventDetails.venue}</dd>
                 </div>
               </div>
               
@@ -274,13 +323,13 @@ const HomePage = () => {
                 </div>
                 <div>
                   <dt className="font-semibold text-secondary-900">Hours</dt>
-                  <dd className="text-sm md:text-base text-secondary-600">9:00 AM - 6:00 PM Daily</dd>
+                  <dd className="text-sm md:text-base text-secondary-600">{content.eventDetails.hours}</dd>
                 </div>
               </div>
             </dl>
           </div>
           
-          <div className="rounded-xl overflow-hidden shadow-lg border border-secondary-200 h-60 md:h-80 bg-secondary-100 mt-4 md:mt-0">
+          <div className="rounded-xl overflow-hidden shadow-lg border border-secondary-200 h-60 md:h-80">
             <div className="w-full h-full bg-center bg-cover" style={{backgroundImage: "url('https://maps.googleapis.com/maps/api/staticmap?center=Kathmandu,Nepal&zoom=14&size=600x400&markers=Kathmandu,Nepal&key=YOUR_API_KEY')"}}>
               <div className="w-full h-full flex items-center justify-center bg-secondary-200">
                 <span className="text-secondary-600 text-sm md:text-base">Event Location Map</span>
