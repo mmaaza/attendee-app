@@ -73,15 +73,15 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-64 bg-white border-r border-secondary-200 z-30 transform transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-[280px] xs:w-64 bg-white border-r border-secondary-200 z-30 transform transition-transform duration-300 md:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="h-full flex flex-col">
           {/* Logo Section */}
-          <div className="p-4 border-b border-secondary-200">
+          <div className="p-mobile-section md:p-4 border-b border-secondary-200">
             <Link to="/admin/dashboard" className="flex items-center space-x-2">
-              <span className="text-2xl font-display font-bold">
+              <span className="text-xl xs:text-2xl font-display font-bold">
                 <span className="text-primary-600">Nep</span>
                 <span className="text-secondary-900">Dent</span>
               </span>
@@ -89,28 +89,28 @@ const AdminLayout = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto p-mobile-section md:p-4 space-y-mobile-gap md:space-y-1">
             {navigationItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${
+                className={`flex items-center space-x-3 px-3 xs:px-4 py-2.5 xs:py-3 rounded-xl transition-colors ${
                   location.pathname === item.path
                     ? 'bg-primary-50 text-primary-700'
                     : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
                 }`}
               >
                 {item.icon}
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium text-sm xs:text-base">{item.name}</span>
               </Link>
             ))}
           </nav>
 
           {/* User Section */}
-          <div className="p-4 border-t border-secondary-200">
+          <div className="p-mobile-section md:p-4 border-t border-secondary-200">
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-3 w-full px-4 py-3 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-xl transition-colors"
+              className="flex items-center space-x-3 w-full px-3 xs:px-4 py-2.5 xs:py-3 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-xl transition-colors text-sm xs:text-base"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -124,12 +124,12 @@ const AdminLayout = () => {
       {/* Main Content */}
       <div className="md:ml-64 min-h-screen">
         {/* Top Bar */}
-        <header className="bg-white border-b border-secondary-200 h-16">
-          <div className="h-full px-4 flex items-center justify-between">
+        <header className="bg-white border-b border-secondary-200 h-14 xs:h-16">
+          <div className="h-full px-mobile-section md:px-4 flex items-center justify-between">
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-secondary-50 text-secondary-600"
+                className="md:hidden p-1.5 xs:p-2 rounded-lg hover:bg-secondary-50 text-secondary-600"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -138,11 +138,11 @@ const AdminLayout = () => {
             </div>
             
             {/* Quick Actions */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-mobile-gap md:space-x-2">
               <NotificationsPanel />
               <Link 
                 to="/admin/settings"
-                className="p-2 rounded-lg hover:bg-secondary-50 text-secondary-600"
+                className="p-1.5 xs:p-2 rounded-lg hover:bg-secondary-50 text-secondary-600"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -154,7 +154,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="p-6">
+        <main className="p-mobile-section xs:p-tablet-section md:p-desktop-section">
           <Outlet />
         </main>
       </div>
