@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 
 const SettingsPage = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [autoApprove, setAutoApprove] = useState(false);
+  const [registrationsEnabled, setRegistrationsEnabled] = useState(true);
   const [interests, setInterests] = useState([]);
   const [newInterest, setNewInterest] = useState("");
 
@@ -16,13 +16,20 @@ const SettingsPage = () => {
 
   const loadSettings = async () => {
     try {
-      const settingsDoc = await getDoc(doc(db, "settings", "interests"));
-      if (settingsDoc.exists()) {
-        setInterests(settingsDoc.data().list || []);
+      const interestsDoc = await getDoc(doc(db, "settings", "interests"));
+      const generalSettingsDoc = await getDoc(doc(db, "settings", "general"));
+      
+      if (interestsDoc.exists()) {
+        setInterests(interestsDoc.data().list || []);
+      }
+      
+      if (generalSettingsDoc.exists()) {
+        setRegistrationsEnabled(generalSettingsDoc.data().registrationsEnabled ?? true);
+        setEmailNotifications(generalSettingsDoc.data().emailNotifications ?? true);
       }
     } catch (error) {
-      console.error("Error loading interests:", error);
-      toast.error("Failed to load interests");
+      console.error("Error loading settings:", error);
+      toast.error("Failed to load settings");
     }
   };
 
@@ -59,12 +66,34 @@ const SettingsPage = () => {
     }
   };
 
-  const toggleEmailNotifications = () => {
-    setEmailNotifications(!emailNotifications);
+  const toggleEmailNotifications = async () => {
+    try {
+      const newValue = !emailNotifications;
+      await setDoc(doc(db, "settings", "general"), {
+        emailNotifications: newValue,
+        registrationsEnabled
+      }, { merge: true });
+      setEmailNotifications(newValue);
+      toast.success("Email notifications setting updated");
+    } catch (error) {
+      console.error("Error updating email notifications:", error);
+      toast.error("Failed to update email notifications setting");
+    }
   };
 
-  const toggleAutoApprove = () => {
-    setAutoApprove(!autoApprove);
+  const toggleRegistrations = async () => {
+    try {
+      const newValue = !registrationsEnabled;
+      await setDoc(doc(db, "settings", "general"), {
+        registrationsEnabled: newValue,
+        emailNotifications
+      }, { merge: true });
+      setRegistrationsEnabled(newValue);
+      toast.success("Registration setting updated");
+    } catch (error) {
+      console.error("Error updating registration setting:", error);
+      toast.error("Failed to update registration setting");
+    }
   };
 
   return (
@@ -187,23 +216,23 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <label className="block text-sm font-semibold text-secondary-900">
-                  Auto-Approve Registrations
+                  Enable Registrations
                 </label>
                 <span className="text-sm text-secondary-600">
-                  Automatically approve new registrations
+                  Allow users to register for the event
                 </span>
               </div>
               <button
-                onClick={toggleAutoApprove}
+                onClick={toggleRegistrations}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${
-                  autoApprove ? "bg-primary-600" : "bg-secondary-200"
+                  registrationsEnabled ? "bg-primary-600" : "bg-secondary-200"
                 }`}
               >
                 <span
                   className={`${
-                    autoApprove ? "translate-x-5" : "translate-x-0"
+                    registrationsEnabled ? "translate-x-5" : "translate-x-0"
                   } inline-block h-5 w-5 transform rounded-full bg-white transition duration-200 ease-in-out`}
-                ></span>
+              ></span>
               </button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { db } from '../../firebase';
 import { collection, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { QRCodeSVG } from 'qrcode.react'; // Fix: correct import for qrcode.react
+import { LockIcon } from 'lucide-react';
 
 // Countries data
 const countries = [
@@ -111,6 +112,7 @@ const SearchableDropdown = ({ value, onChange, onBlur }) => {
 const RegistrationPage = () => {
   const navigate = useNavigate();
   const [interests, setInterests] = useState([]);
+  const [registrationsEnabled, setRegistrationsEnabled] = useState(true);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -121,21 +123,28 @@ const RegistrationPage = () => {
     interests: []
   });
 
-  // Fetch available interests from Firestore
+  // Fetch settings and interests from Firestore
   useEffect(() => {
-    const fetchInterests = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch registration status
+        const generalSettingsDoc = await getDoc(doc(db, 'settings', 'general'));
+        if (generalSettingsDoc.exists()) {
+          setRegistrationsEnabled(generalSettingsDoc.data().registrationsEnabled ?? true);
+        }
+
+        // Fetch interests
         const interestsDoc = await getDoc(doc(db, 'settings', 'interests'));
         if (interestsDoc.exists()) {
           setInterests(interestsDoc.data().list || []);
         }
       } catch (error) {
-        console.error('Error fetching interests:', error);
-        toast.error('Failed to load interests');
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load registration form');
       }
     };
 
-    fetchInterests();
+    fetchData();
   }, []);
 
   // Handle input changes
@@ -162,6 +171,11 @@ const RegistrationPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!registrationsEnabled) {
+      toast.error('Registration is currently closed');
+      return;
+    }
 
     // Form validation
     if (!formData.fullName.trim()) {
@@ -255,6 +269,22 @@ const RegistrationPage = () => {
       console.error('Error adding document: ', error);
     }
   };
+
+  if (!registrationsEnabled) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 py-12 flex items-center justify-center">
+        <div className="max-w-md mx-auto px-4 text-center">
+          <div className="bg-white rounded-2xl shadow-card border border-secondary-100 p-8">
+            <LockIcon className="h-16 w-16 mx-auto text-secondary-400" />
+            <h2 className="mt-4 text-2xl font-bold text-secondary-900">Registration Closed</h2>
+            <p className="mt-2 text-secondary-600">
+              Registration for NEPDENT DTS 2025 is currently closed. Please check back later or contact the organizers for more information.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 py-12">

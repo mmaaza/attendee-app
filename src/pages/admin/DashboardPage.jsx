@@ -14,6 +14,7 @@ import { formatDistanceToNow } from "date-fns";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalRegistrations: 0,
     todayCheckins: 0,
@@ -26,6 +27,7 @@ const DashboardPage = () => {
   }, []);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
       // Get recent registrations
       const registrationsQuery = query(
@@ -65,27 +67,42 @@ const DashboardPage = () => {
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Loading skeleton for the table
+  const TableSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="h-6 bg-secondary-100 rounded w-full mb-4"></div>
+      {[1, 2, 3, 4].map(item => (
+        <div key={item} className="space-y-3 mb-4">
+          <div className="h-4 bg-secondary-100 rounded w-full"></div>
+          <div className="h-4 bg-secondary-100 rounded w-3/4"></div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold font-display text-secondary-900">
+    <div className="space-y-mobile-section md:space-y-tablet-section">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+        <h1 className="text-h2 md:text-h1 font-bold font-display text-secondary-900">
           Dashboard Overview
         </h1>
-        <div className="flex gap-4">
-          <button className="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+        <div className="w-full sm:w-auto">
+          <button className="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
             Export Report
           </button>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-mobile-gap md:gap-tablet-gap">
+        <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
-            <div className="bg-primary-50 p-3 rounded-xl">
+            <div className="bg-primary-50 p-2 sm:p-3 rounded-xl">
               <div className="text-primary-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -103,17 +120,21 @@ const DashboardPage = () => {
                 </svg>
               </div>
             </div>
-            <span className="text-3xl font-bold text-secondary-900">
-              {stats.totalRegistrations}
+            <span className="text-2xl md:text-3xl font-bold text-secondary-900">
+              {loading ? (
+                <div className="h-8 w-12 bg-secondary-100 animate-pulse rounded"></div>
+              ) : (
+                stats.totalRegistrations
+              )}
             </span>
           </div>
-          <h3 className="mt-4 text-secondary-600 font-medium">
+          <h3 className="mt-3 md:mt-4 text-sm md:text-base text-secondary-600 font-medium">
             Total Registrations
           </h3>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
+        <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
-            <div className="bg-primary-50 p-3 rounded-xl">
+            <div className="bg-primary-50 p-2 sm:p-3 rounded-xl">
               <div className="text-primary-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -131,17 +152,21 @@ const DashboardPage = () => {
                 </svg>
               </div>
             </div>
-            <span className="text-3xl font-bold text-secondary-900">
-              {stats.todayCheckins}
+            <span className="text-2xl md:text-3xl font-bold text-secondary-900">
+              {loading ? (
+                <div className="h-8 w-12 bg-secondary-100 animate-pulse rounded"></div>
+              ) : (
+                stats.todayCheckins
+              )}
             </span>
           </div>
-          <h3 className="mt-4 text-secondary-600 font-medium">
+          <h3 className="mt-3 md:mt-4 text-sm md:text-base text-secondary-600 font-medium">
             Today's Check-ins
           </h3>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
+        <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
-            <div className="bg-primary-50 p-3 rounded-xl">
+            <div className="bg-primary-50 p-2 sm:p-3 rounded-xl">
               <div className="text-primary-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -159,81 +184,93 @@ const DashboardPage = () => {
                 </svg>
               </div>
             </div>
-            <span className="text-3xl font-bold text-secondary-900">
-              {stats.availablePasses}
+            <span className="text-2xl md:text-3xl font-bold text-secondary-900">
+              {loading ? (
+                <div className="h-8 w-12 bg-secondary-100 animate-pulse rounded"></div>
+              ) : (
+                stats.availablePasses
+              )}
             </span>
           </div>
-          <h3 className="mt-4 text-secondary-600 font-medium">
+          <h3 className="mt-3 md:mt-4 text-sm md:text-base text-secondary-600 font-medium">
             Available Passes
           </h3>
         </div>
       </div>
 
       {/* Recent Registrations */}
-      <div className="bg-white rounded-xl shadow-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-secondary-900">
+      <div className="bg-white rounded-xl shadow-card p-mobile-section md:p-tablet-section">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-mobile-gap md:mb-tablet-gap">
+          <h2 className="text-h3 md:text-h2 font-bold text-secondary-900">
             Recent Registrations
           </h2>
-          <button className="text-primary-600 hover:text-primary-700 font-medium">
+          <button 
+            onClick={() => navigate('/admin/registrations')}
+            className="text-primary-600 hover:text-primary-700 font-medium text-sm md:text-base">
             View All
           </button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left border-b border-secondary-200">
-                <th className="pb-3 text-secondary-600 font-semibold">Name</th>
-                <th className="pb-3 text-secondary-600 font-semibold">
-                  Company
-                </th>
-                <th className="pb-3 text-secondary-600 font-semibold">Email</th>
-                <th className="pb-3 text-secondary-600 font-semibold">Time</th>
-                <th className="pb-3 text-secondary-600 font-semibold">
-                  Status
-                </th>
-                <th className="pb-3 text-secondary-600 font-semibold">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-secondary-100">
-              {recentRegistrations.map((registration, index) => (
-                <tr key={index} className="hover:bg-secondary-50">
-                  <td className="py-4 text-secondary-900">
-                    {registration.name}
-                  </td>
-                  <td className="py-4 text-secondary-600">
-                    {registration.company}
-                  </td>
-                  <td className="py-4 text-secondary-600">
-                    {registration.email}
-                  </td>
-                  <td className="py-4 text-secondary-600">
-                    {registration.time}
-                  </td>
-                  <td className="py-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        registration.status === "approved"
-                          ? "bg-success/10 text-success"
-                          : "bg-warning/10 text-warning"
-                      }`}
-                    >
-                      {registration.status === "approved"
-                        ? "Approved"
-                        : "Pending"}
-                    </span>
-                  </td>
-                  <td className="py-4">
-                    <button className="text-primary-600 hover:text-primary-700 font-medium">
-                      View Details
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="overflow-x-auto -mx-mobile-section md:-mx-tablet-section">
+          <div className="min-w-[800px] px-mobile-section md:px-tablet-section">
+            {loading ? (
+              <TableSkeleton />
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left border-b border-secondary-200">
+                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">Name</th>
+                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">
+                      Company
+                    </th>
+                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">Email</th>
+                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">Time</th>
+                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">
+                      Status
+                    </th>
+                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-secondary-100">
+                  {recentRegistrations.map((registration, index) => (
+                    <tr key={index} className="hover:bg-secondary-50">
+                      <td className="py-3 md:py-4 text-sm md:text-base text-secondary-900">
+                        {registration.name}
+                      </td>
+                      <td className="py-3 md:py-4 text-sm md:text-base text-secondary-600">
+                        {registration.company}
+                      </td>
+                      <td className="py-3 md:py-4 text-sm md:text-base text-secondary-600">
+                        {registration.email}
+                      </td>
+                      <td className="py-3 md:py-4 text-sm md:text-base text-secondary-600">
+                        {registration.time}
+                      </td>
+                      <td className="py-3 md:py-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            registration.status === "approved"
+                              ? "bg-success/10 text-success"
+                              : "bg-warning/10 text-warning"
+                          }`}
+                        >
+                          {registration.status === "approved"
+                            ? "Approved"
+                            : "Pending"}
+                        </span>
+                      </td>
+                      <td className="py-3 md:py-4">
+                        <button className="text-sm md:text-base text-primary-600 hover:text-primary-700 font-medium">
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>
