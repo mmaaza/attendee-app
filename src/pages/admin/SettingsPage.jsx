@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const SettingsPage = () => {
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [autoApprove, setAutoApprove] = useState(false);
+
+  const toggleEmailNotifications = () => {
+    setEmailNotifications(!emailNotifications);
+  };
+
+  const toggleAutoApprove = () => {
+    setAutoApprove(!autoApprove);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -56,8 +67,11 @@ const SettingsPage = () => {
                 <label className="block text-sm font-semibold text-secondary-900">Email Notifications</label>
                 <span className="text-sm text-secondary-600">Receive email alerts for new registrations</span>
               </div>
-              <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 bg-primary-600">
-                <span className="translate-x-5 inline-block h-5 w-5 transform rounded-full bg-white transition duration-200 ease-in-out"></span>
+              <button
+                onClick={toggleEmailNotifications}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${emailNotifications ? 'bg-primary-600' : 'bg-secondary-200'}`}
+              >
+                <span className={`${emailNotifications ? 'translate-x-5' : 'translate-x-0'} inline-block h-5 w-5 transform rounded-full bg-white transition duration-200 ease-in-out`}></span>
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -65,8 +79,11 @@ const SettingsPage = () => {
                 <label className="block text-sm font-semibold text-secondary-900">Auto-Approve Registrations</label>
                 <span className="text-sm text-secondary-600">Automatically approve new registrations</span>
               </div>
-              <button className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 bg-secondary-200">
-                <span className="translate-x-0 inline-block h-5 w-5 transform rounded-full bg-white transition duration-200 ease-in-out"></span>
+              <button
+                onClick={toggleAutoApprove}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 ${autoApprove ? 'bg-primary-600' : 'bg-secondary-200'}`}
+              >
+                <span className={`${autoApprove ? 'translate-x-5' : 'translate-x-0'} inline-block h-5 w-5 transform rounded-full bg-white transition duration-200 ease-in-out`}></span>
               </button>
             </div>
           </div>

@@ -155,12 +155,12 @@ const HomePageContentPage = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold font-display text-secondary-900">Homepage Content Management</h1>
-        <div className="space-x-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+        <h1 className="text-xl sm:text-2xl font-bold font-display text-secondary-900">Homepage Content Management</h1>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
           <button
             onClick={() => setIsEditMode(!isEditMode)}
-            className="px-6 py-2 bg-secondary-600 text-white rounded-xl hover:bg-secondary-700 transition-colors"
+            className="px-4 sm:px-6 py-2 bg-secondary-600 text-white text-sm sm:text-base rounded-xl hover:bg-secondary-700 transition-colors w-full sm:w-auto"
           >
             {isEditMode ? 'Cancel Edit' : 'Edit Content'}
           </button>
@@ -168,7 +168,7 @@ const HomePageContentPage = () => {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-6 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50"
+              className="px-4 sm:px-6 py-2 bg-primary-600 text-white text-sm sm:text-base rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50 w-full sm:w-auto"
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>

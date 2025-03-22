@@ -91,6 +91,21 @@ const RegistrationPage = () => {
         uid: customId // Add custom UID
       });
 
+      // Create notification for admin
+      await addDoc(collection(db, 'notifications'), {
+        type: 'NEW_REGISTRATION',
+        userId: docRef.id,
+        title: 'New Registration',
+        message: `${formData.firstName} ${formData.lastName} from ${formData.company} has registered`,
+        timestamp: new Date(),
+        isRead: false,
+        metadata: {
+          attendeeId: customId,
+          email: formData.email,
+          company: formData.company
+        }
+      });
+
       // Generate QR code URL with the Firestore document ID
       const qrCodeUrl = `https://nepdent.netlify.app/check-in/${docRef.id}`;
       
