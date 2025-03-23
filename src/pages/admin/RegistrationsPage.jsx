@@ -9,9 +9,13 @@ import {
   deleteDoc,
   startAfter,
   limit,
+  where,
+  updateDoc,
 } from "firebase/firestore";
 import { format, formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
+import fullLogo from "../../assets/full-logo.png";
+import procareLogo from "../../assets/procare-logo.png";
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemCount }) => {
@@ -190,6 +194,7 @@ const RegistrationsPage = () => {
   const [itemsToDelete, setItemsToDelete] = useState([]);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
 
+  // Initial data fetch
   useEffect(() => {
     fetchRegistrations();
   }, []);
@@ -232,6 +237,7 @@ const RegistrationsPage = () => {
         const data = doc.data();
         return {
           id: data.uid,
+          docId: doc.id,
           name: data.fullName,
           company: data.company,
           email: data.email,
@@ -240,6 +246,7 @@ const RegistrationsPage = () => {
             ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
             : "Unknown",
           phone: data.mobileNumber || "N/A",
+          cardPrinted: data.cardPrinted || false
         };
       });
 
@@ -289,34 +296,63 @@ const RegistrationsPage = () => {
   };
 
   const handleDelete = async (id) => {
-    setItemsToDelete([id]);
-    setDeleteModalOpen(true);
+    const registration = registrations.find(r => r.id === id);
+    if (registration) {
+      setItemsToDelete([registration.docId]);
+      setDeleteModalOpen(true);
+    }
   };
 
   const handleBulkDelete = async () => {
     if (selectedRegistrations.length === 0) return;
-    setItemsToDelete(selectedRegistrations);
+    const docsToDelete = registrations
+      .filter(reg => selectedRegistrations.includes(reg.id))
+      .map(reg => reg.docId);
+    setItemsToDelete(docsToDelete);
     setDeleteModalOpen(true);
   };
 
   const confirmDelete = async () => {
     try {
+      // Create a unique loading toast for the operation
       const loadingToast = toast.loading(
         `Deleting ${itemsToDelete.length} registration${
           itemsToDelete.length > 1 ? "s" : ""
         }...`
       );
 
-      const promises = itemsToDelete.map((id) => {
-        const docRef = doc(db, "users", id);
-        return deleteDoc(docRef);
+      // Create an array of promises for each deletion operation
+      const deletePromises = itemsToDelete.map(async (docId) => {
+        try {
+          // Delete the user document
+          await deleteDoc(doc(db, "users", docId));
+          
+          // Also attempt to delete any associated notifications
+          const notificationsQuery = query(
+            collection(db, "notifications"),
+            where("metadata.attendeeId", "==", docId)
+          );
+          const notificationSnapshot = await getDocs(notificationsQuery);
+          const notificationPromises = notificationSnapshot.docs.map((doc) =>
+            deleteDoc(doc.ref)
+          );
+          await Promise.all(notificationPromises);
+          
+          return true;
+        } catch (error) {
+          console.error(`Error deleting registration ${docId}:`, error);
+          return false;
+        }
       });
 
-      await Promise.all(promises);
+      // Wait for all deletions to complete
+      const results = await Promise.all(deletePromises);
+      const successCount = results.filter(Boolean).length;
+      const failureCount = results.length - successCount;
 
-      // Update local state
+      // Update local state to remove deleted items
       setRegistrations((prev) =>
-        prev.filter((reg) => !itemsToDelete.includes(reg.id))
+        prev.filter((reg) => !itemsToDelete.includes(reg.docId))
       );
 
       // Clear selection if bulk delete
@@ -324,17 +360,27 @@ const RegistrationsPage = () => {
         setSelectedRegistrations([]);
       }
 
+      // Dismiss loading toast and show result
       toast.dismiss(loadingToast);
-      toast.success(
-        `${itemsToDelete.length} registration${
-          itemsToDelete.length > 1 ? "s" : ""
-        } deleted`
-      );
+      if (failureCount === 0) {
+        toast.success(
+          `Successfully deleted ${successCount} registration${
+            successCount !== 1 ? "s" : ""
+          }`
+        );
+      } else {
+        toast.error(
+          `Failed to delete ${failureCount} registration${
+            failureCount !== 1 ? "s" : ""
+          }. Please try again.`
+        );
+      }
+    } catch (error) {
+      console.error("Error in deletion process:", error);
+      toast.error("An error occurred while deleting registrations");
+    } finally {
       setDeleteModalOpen(false);
       setItemsToDelete([]);
-    } catch (error) {
-      console.error("Error deleting registration(s):", error);
-      toast.error("Failed to delete registration(s)");
     }
   };
 
@@ -354,6 +400,139 @@ const RegistrationsPage = () => {
 
   const handleViewDetails = (registration) => {
     setSelectedRegistration(registration);
+  };
+
+  const handlePrint = async (registration) => {
+    const printWindow = window.open('', '_blank');
+    const content = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Registration Card - ${registration.name}</title>
+          <style>
+            @page {
+              size: 54mm 85.6mm;
+              margin: 0;
+            }
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              margin: 0;
+              padding: 16px;
+              width: 54mm;
+              height: 85.6mm;
+              box-sizing: border-box;
+              border: 1px solid #e5e7eb;
+            }
+            .container {
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+            }
+            .header {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-bottom: 16px;
+              padding-bottom: 8px;
+              border-bottom: 1px solid #e5e7eb;
+            }
+            .header img {
+              height: 40px;
+            }
+            .content {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 16px;
+            }
+            .label {
+              color: #666;
+              font-size: 0.75rem;
+              text-align: center;
+            }
+            .value {
+              color: #111827;
+              font-weight: bold;
+              text-align: center;
+              margin-bottom: 8px;
+            }
+            .value.name {
+              font-size: 0.875rem;
+            }
+            .value.id {
+              font-size: 0.75rem;
+            }
+            .footer {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              padding-top: 8px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .footer img {
+              height: 28px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <img src="${fullLogo}" alt="NepDent Logo" />
+            </div>
+            <div class="content">
+              <div>
+                ${registration.qrCodeUrl ? 
+                  `<img src="${registration.qrCodeUrl}" alt="QR Code" style="width: 70px; height: 70px;" />` :
+                  `<div id="qrcode"></div>
+                  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+                  <script>
+                    var qr = qrcode(0, 'M');
+                    qr.addData('${registration.id}');
+                    qr.make();
+                    document.getElementById('qrcode').innerHTML = qr.createImgTag(2, 8);
+                    var img = document.querySelector('#qrcode img');
+                    img.style.width = '70px';
+                    img.style.height = '70px';
+                  </script>`
+                }
+              </div>
+              <div>
+                <div class="label">Attendee</div>
+                <div class="value name">${registration.name}</div>
+                <div class="label">ID</div>
+                <div class="value id">${registration.id}</div>
+              </div>
+            </div>
+            <div class="footer">
+              <img src="${procareLogo}" alt="Procare Logo" />
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(content);
+    printWindow.document.close();
+    setTimeout(async () => {
+      printWindow.print();
+      // Update the print status in Firestore
+      try {
+        await updateDoc(doc(db, 'users', registration.docId), {
+          cardPrinted: true
+        });
+        // Update local state
+        setRegistrations(prevRegistrations => 
+          prevRegistrations.map(reg => 
+            reg.id === registration.id ? { ...reg, cardPrinted: true } : reg
+          )
+        );
+        toast.success('Card printed successfully');
+      } catch (error) {
+        console.error('Error updating print status:', error);
+        toast.error('Failed to update print status');
+      }
+    }, 500);
   };
 
   const filteredRegistrations = searchTerm
@@ -498,6 +677,12 @@ const RegistrationsPage = () => {
                         </th>
                         <th
                           scope="col"
+                          className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
+                        >
+                          Card Status
+                        </th>
+                        <th
+                          scope="col"
                           className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700"
                         >
                           Actions
@@ -552,6 +737,15 @@ const RegistrationsPage = () => {
                                 {registration.formattedCreatedAt}
                               </span>
                             </td>
+                            <td className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center ${
+                                registration.cardPrinted 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {registration.cardPrinted ? 'Printed' : 'Not Printed'}
+                              </span>
+                            </td>
                             <td className="px-3 sm:px-4 py-3 sm:py-4">
                               <div className="flex items-center gap-2">
                                 <button
@@ -579,6 +773,26 @@ const RegistrationsPage = () => {
                                       strokeLinejoin="round"
                                       strokeWidth={2}
                                       d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handlePrint(registration)}
+                                  className="text-secondary-600 hover:text-primary-700 transition-colors p-1 sm:p-2"
+                                  title="Print"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 sm:h-5 w-4 sm:w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
                                     />
                                   </svg>
                                 </button>

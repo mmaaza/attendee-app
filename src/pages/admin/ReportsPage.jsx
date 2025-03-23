@@ -20,6 +20,11 @@ const ReportsPage = () => {
       total: 0,
       checkedIn: 0,
       pending: 0
+    },
+    printStats: {
+      total: 0,
+      printed: 0,
+      notPrinted: 0
     }
   });
 
@@ -58,6 +63,7 @@ const ReportsPage = () => {
           name: reg.fullName || 'Unknown',
           email: reg.email || 'Unknown',
           checkedIn: reg.checkedIn || false,
+          cardPrinted: reg.cardPrinted || false,
           country: reg.country || 'Unknown',
           interests: reg.interests || []
         });
@@ -91,6 +97,17 @@ const ReportsPage = () => {
         return acc;
       }, {});
 
+      // Calculate print status statistics
+      const printStats = registrations.reduce((acc, reg) => {
+        acc.total++;
+        if (reg.cardPrinted) {
+          acc.printed++;
+        } else {
+          acc.notPrinted++;
+        }
+        return acc;
+      }, { total: 0, printed: 0, notPrinted: 0 });
+
       setReportData({
         totalRegistrations,
         registrationsByDate,
@@ -110,7 +127,8 @@ const ReportsPage = () => {
           total: totalRegistrations,
           checkedIn: registrations.filter(r => r.checkedIn).length,
           pending: registrations.filter(r => !r.checkedIn).length
-        }
+        },
+        printStats
       });
     } catch (error) {
       console.error('Error fetching report data:', error);
@@ -189,21 +207,26 @@ const ReportsPage = () => {
       doc.setFontSize(12);
       doc.text(`Total Registrations: ${reportData.totalRegistrations}`, 14, 25);
       doc.text(`Checked In: ${reportData.checkInStats.checkedIn}`, 14, 32);
-      doc.text(`Pending: ${reportData.checkInStats.pending}`, 14, 39);
+      doc.text(`Pending Check-in: ${reportData.checkInStats.pending}`, 14, 39);
+      doc.text(`Cards Printed: ${reportData.printStats.printed}`, 14, 46);
+      doc.text(`Cards Pending Print: ${reportData.printStats.notPrinted}`, 14, 53);
 
       // Add registration table
       autoTable(doc, {
-        startY: 45,
-        head: [['User ID', 'Name', 'Email', 'Company', 'Country', 'Status', 'Date']],
-        body: reportData.registrationsByDate.map(reg => [
-          reg.id,
-          reg.name,
-          reg.email,
-          reg.company,
-          reg.country,
-          reg.checkedIn ? 'Checked In' : 'Pending',
-          reg.date
-        ]),
+        startY: 60,
+        head: [['User ID', 'Name', 'Email', 'Company', 'Country', 'Check-in Status', 'Print Status', 'Date']],
+        body: reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => [
+            reg.id,
+            reg.name,
+            reg.email,
+            reg.company,
+            reg.country,
+            reg.checkedIn ? 'Checked In' : 'Pending',
+            reg.cardPrinted ? 'Printed' : 'Not Printed',
+            dateGroup.date
+          ])
+        ),
       });
 
       doc.save('registration_report.pdf');
@@ -427,6 +450,35 @@ const ReportsPage = () => {
             </span>
           </div>
           <h3 className="mt-4 text-secondary-600 font-medium">Pending Check-ins</h3>
+        </div>
+
+        {/* Print Status Card */}
+        <div className="bg-white p-6 rounded-xl shadow-card">
+          <div className="flex items-center justify-between">
+            <div className="bg-primary-50 p-3 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+            </div>
+            <span className="text-3xl font-bold text-secondary-900">
+              {loading ? '...' : reportData.printStats.printed}
+            </span>
+          </div>
+          <h3 className="mt-4 text-secondary-600 font-medium">Cards Printed</h3>
+        </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-card">
+          <div className="flex items-center justify-between">
+            <div className="bg-secondary-50 p-3 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-secondary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-3xl font-bold text-secondary-900">
+              {loading ? '...' : reportData.printStats.notPrinted}
+            </span>
+          </div>
+          <h3 className="mt-4 text-secondary-600 font-medium">Cards Pending Print</h3>
         </div>
       </div>
 

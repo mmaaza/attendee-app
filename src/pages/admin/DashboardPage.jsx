@@ -10,7 +10,100 @@ import {
   where,
   Timestamp,
 } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
+
+// Details Modal Component
+const DetailsModal = ({ isOpen, onClose, registration }) => {
+  if (!isOpen || !registration) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="fixed inset-0 bg-secondary-900/75 transition-opacity"></div>
+      <div className="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="relative transform overflow-hidden bg-white text-left shadow-xl transition-all w-full sm:rounded-xl sm:max-w-lg sm:my-8">
+          <div className="bg-white px-4 sm:px-6 pt-5 pb-4 sm:p-6">
+            <div className="flex items-start justify-between mb-4 sm:mb-6">
+              <h3 className="text-lg sm:text-xl font-semibold leading-6 text-secondary-900">
+                Registration Details
+              </h3>
+              <button
+                onClick={onClose}
+                className="rounded-lg p-2 text-secondary-400 hover:text-secondary-500 active:bg-secondary-50"
+                aria-label="Close details"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 sm:h-6 sm:w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="space-y-3 sm:space-y-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-secondary-500">
+                  ID
+                </label>
+                <div className="mt-1 text-sm sm:text-base text-secondary-900 font-mono">
+                  {registration.id}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-secondary-500">
+                  Name
+                </label>
+                <div className="mt-1 text-sm sm:text-base text-secondary-900">
+                  {registration.name}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-secondary-500">
+                  Email
+                </label>
+                <div className="mt-1 text-sm sm:text-base text-secondary-900 break-all">
+                  {registration.email}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-secondary-500">
+                  Company
+                </label>
+                <div className="mt-1 text-sm sm:text-base text-secondary-900">
+                  {registration.company}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-secondary-500">
+                  Registration Date
+                </label>
+                <div className="mt-1 text-sm sm:text-base text-secondary-900">
+                  {format(registration.createdAt, "PPP p")}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-secondary-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t border-secondary-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm font-medium rounded-xl border border-secondary-300 bg-white text-secondary-700 shadow-sm hover:bg-secondary-50 transition-colors duration-300 active:bg-secondary-100"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -21,6 +114,7 @@ const DashboardPage = () => {
     availablePasses: 0,
   });
   const [recentRegistrations, setRecentRegistrations] = useState([]);
+  const [selectedRegistration, setSelectedRegistration] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -39,14 +133,17 @@ const DashboardPage = () => {
       const querySnapshot = await getDocs(registrationsQuery);
       const registrations = querySnapshot.docs.map((doc) => {
         const data = doc.data();
+        const createdAt = data.createdAt?.toDate(); // Convert Firestore timestamp to JS Date
         return {
+          id: data.uid,
           name: `${data.fullName}`,
           email: data.email,
-          time: formatDistanceToNow(data.createdAt.toDate(), {
+          time: formatDistanceToNow(createdAt, {
             addSuffix: true,
           }),
-          status: "approved", // You can add a status field to your users collection if needed
+          status: "approved",
           company: data.company,
+          createdAt: createdAt, // Add createdAt to the registration object
         };
       });
 
@@ -70,6 +167,10 @@ const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleViewDetails = (registration) => {
+    setSelectedRegistration(registration);
   };
 
   // Loading skeleton for the table
@@ -225,8 +326,8 @@ const DashboardPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-secondary-100">
-                  {recentRegistrations.map((registration, index) => (
-                    <tr key={index} className="hover:bg-secondary-50">
+                  {recentRegistrations.map((registration) => (
+                    <tr key={registration.id} className="hover:bg-secondary-50">
                       <td className="py-3 md:py-4 text-sm md:text-base text-secondary-900">
                         {registration.name}
                       </td>
@@ -240,7 +341,9 @@ const DashboardPage = () => {
                         {registration.time}
                       </td>
                       <td className="py-3 md:py-4">
-                        <button className="text-sm md:text-base text-primary-600 hover:text-primary-700 font-medium">
+                        <button 
+                          onClick={() => handleViewDetails(registration)}
+                          className="text-sm md:text-base text-primary-600 hover:text-primary-700 font-medium">
                           View Details
                         </button>
                       </td>
@@ -252,6 +355,12 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+      <DetailsModal
+        isOpen={selectedRegistration !== null}
+        onClose={() => setSelectedRegistration(null)}
+        registration={selectedRegistration}
+      />
     </div>
   );
 };

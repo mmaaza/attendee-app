@@ -223,7 +223,8 @@ const RegistrationPage = () => {
       const docRef = await addDoc(collection(db, 'users'), {
         ...formData,
         createdAt: new Date(), // Add a timestamp
-        uid: customId // Add custom UID
+        uid: customId,
+        cardPrinted: false
       });
 
       // Create notification for admin
