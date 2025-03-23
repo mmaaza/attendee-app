@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { db } from '../../firebase';
-import { collection, addDoc, updateDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc, getDoc, query, where, getDocs } from 'firebase/firestore'; 'firebase/firestore';
 import { QRCodeSVG } from 'qrcode.react'; // Fix: correct import for qrcode.react
 import { LockIcon } from 'lucide-react';
 
@@ -216,6 +216,18 @@ const RegistrationPage = () => {
     const loadingToast = toast.loading('Processing your registration...');
 
     try {
+      // Check if email already exists
+      const usersCollection = collection(db, 'users');
+      const q = query(usersCollection, where('email', '==', formData.email.trim()));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        // Email already exists
+        toast.dismiss(loadingToast);
+        toast.error('This email address is already registered. Please use a different email.');
+        return;
+      }
+      
       // Generate a custom document ID
       const customId = `NEPDENT-${Math.floor(10000 + Math.random() * 90000)}`;
 
