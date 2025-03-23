@@ -143,7 +143,7 @@ const DashboardPage = () => {
           }),
           status: "approved",
           company: data.company,
-          createdAt: createdAt, // Add createdAt to the registration object
+          createdAt: createdAt,
         };
       });
 
