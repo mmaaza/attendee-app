@@ -206,7 +206,7 @@ const DashboardPage = () => {
           </h2>
           <button 
             onClick={() => navigate('/admin/registrations')}
-            className="text-primary-600 hover:text-primary-700 font-medium text-sm md:text-base">
+            className="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
             View All
           </button>
         </div>
@@ -224,9 +224,6 @@ const DashboardPage = () => {
                     </th>
                     <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">Email</th>
                     <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">Time</th>
-                    <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">
-                      Status
-                    </th>
                     <th className="pb-3 text-sm md:text-base text-secondary-600 font-semibold">
                       Action
                     </th>
@@ -246,19 +243,6 @@ const DashboardPage = () => {
                       </td>
                       <td className="py-3 md:py-4 text-sm md:text-base text-secondary-600">
                         {registration.time}
-                      </td>
-                      <td className="py-3 md:py-4">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            registration.status === "approved"
-                              ? "bg-success/10 text-success"
-                              : "bg-warning/10 text-warning"
-                          }`}
-                        >
-                          {registration.status === "approved"
-                            ? "Approved"
-                            : "Pending"}
-                        </span>
                       </td>
                       <td className="py-3 md:py-4">
                         <button className="text-sm md:text-base text-primary-600 hover:text-primary-700 font-medium">

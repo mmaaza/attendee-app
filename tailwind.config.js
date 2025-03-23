@@ -78,7 +78,7 @@ export default {
         '96': '24rem',
         // Mobile-first spacing
         'mobile-section': '1.5rem',
-        'tablet-section': '2rem',
+        'tablet-section': '1rem',
         'desktop-section': '3rem',
         'mobile-gap': '1rem',
         'tablet-gap': '1.5rem',
