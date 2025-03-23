@@ -40,14 +40,14 @@ const RegistrationConfirmationPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 py-12">
-      {/* Decorative elements - hidden in print */}
-      <div className="print:hidden absolute top-20 left-20 w-72 h-72 bg-accent-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
-      <div className="print:hidden absolute bottom-20 right-20 w-72 h-72 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+      {/* Decorative elements */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-accent-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+      <div className="absolute bottom-20 right-20 w-72 h-72 bg-primary-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
       {/* Main content */}
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Screen version */}
-        <div className="print:hidden bg-white rounded-2xl shadow-card border border-secondary-100 p-8 text-center">
+        <div className="bg-white rounded-2xl shadow-card border border-secondary-100 p-8 text-center">
           <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -108,13 +108,7 @@ const RegistrationConfirmationPage = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => window.print()}
-              className="bg-secondary-100 text-secondary-800 px-6 py-3 rounded-xl font-medium hover:bg-secondary-200 transition-colors"
-            >
-              Print Details
-            </button>
+          <div className="flex justify-center">
             <Link
               to="/"
               className="bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors"
@@ -124,38 +118,8 @@ const RegistrationConfirmationPage = () => {
           </div>
         </div>
 
-        {/* Print version - Portrait Card */}
-        <div className="hidden print:block w-[54mm] h-[85.6mm] mx-auto bg-white border border-secondary-200 p-4">
-          <div className="flex flex-col justify-between h-full">
-            <div className="flex justify-center items-center mb-4 border-b border-secondary-200 pb-2">
-              <img src={fullLogo} className="h-10" alt="" />
-            </div>
-            
-            <div className="flex flex-col items-center space-y-4">
-              <div className="flex-shrink-0">
-                <QRCodeSVG value={qrCodeUrl} size={70} />
-              </div>
-              
-              <div className="text-center">
-                <div className="text-xs text-secondary-500">Attendee</div>
-                <div className="text-sm font-bold text-secondary-900 mb-2">
-                  {fullName}
-                </div>
-                
-                <div className="text-xs text-secondary-500">ID</div>
-                <div className="text-xs font-bold text-secondary-900">
-                  {attendeeId}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center items-center border-t border-secondary-200">
-              <img src={procareLogo} className="h-7" alt="Procare Logo" />
-            </div>
-          </div>
-        </div>
-
-        {/* Info section - hidden in print */}
-        <div className="print:hidden mt-8 bg-white p-5 rounded-xl shadow-sm border border-secondary-100">
+        {/* Info section */}
+        <div className="mt-8 bg-white p-5 rounded-xl shadow-sm border border-secondary-100">
           <div className="flex items-start gap-3">
             <div className="text-accent-600">
               <svg
