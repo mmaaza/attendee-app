@@ -91,11 +91,6 @@ const DashboardPage = () => {
         <h1 className="text-h2 md:text-h1 font-bold font-display text-secondary-900">
           Dashboard Overview
         </h1>
-        <div className="w-full sm:w-auto">
-          <button className="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
-            Export Report
-          </button>
-        </div>
       </div>
 
       {/* Stats Grid */}

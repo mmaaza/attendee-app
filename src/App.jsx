@@ -9,6 +9,7 @@ import DigitalPassPage from './pages/DigitalPassPage';
 import AdminLoginPage from './pages/admin/LoginPage';
 import AdminDashboardPage from './pages/admin/DashboardPage';
 import RegistrationsPage from './pages/admin/RegistrationsPage';
+import ReportsPage from './pages/admin/ReportsPage';
 import CheckInPage from './pages/CheckInPage';
 import HomePageContentPage from './pages/admin/HomePageContentPage';
 import SettingsPage from './pages/admin/SettingsPage';
@@ -81,6 +82,7 @@ function App() {
           }>
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="registrations" element={<RegistrationsPage />} />
+            <Route path="reports" element={<ReportsPage />} />
             <Route path="homepage-content" element={<HomePageContentPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

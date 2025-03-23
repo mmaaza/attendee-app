@@ -380,28 +380,6 @@ const RegistrationsPage = () => {
         <h1 className="text-h2 md:text-3xl lg:text-4xl font-bold font-display text-secondary-900">
           Registrations
         </h1>
-        <div className="w-full sm:w-auto">
-          <button
-            onClick={handleExport}
-            className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-primary-600 text-white rounded-xl shadow-lg hover:bg-primary-700 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-              />
-            </svg>
-            Export
-          </button>
-        </div>
       </div>
 
       {/* Filters & Search */}
