@@ -82,7 +82,7 @@ const HomePage = () => {
             <div className="absolute inset-0 bg-accent-100 transform rotate-3 rounded-2xl"></div>
             <div className="relative rounded-2xl overflow-hidden shadow-card">
               <img 
-                src="https://images.pexels.com/photos/4687360/pexels-photo-4687360.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" 
+                src="https://res.cloudinary.com/dy3ceb1zw/image/upload/v1742810563/WhatsApp_Image_2025-03-23_at_3.12.08_PM_gwemkm.jpg" 
                 alt="Dental Exhibition" 
                 className="w-full h-64 md:h-96 object-cover"
               />
