@@ -16,6 +16,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 import fullLogo from "../../assets/full-logo.png";
 import procareLogo from "../../assets/procare-logo.png";
+import CustomDropdown from '../../components/CustomDropdown';
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemCount }) => {
@@ -189,10 +190,41 @@ const RegistrationsPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegistrations, setSelectedRegistrations] = useState([]);
+  const [printFilter, setPrintFilter] = useState("all"); // Add print filter state
   const pageSize = 10;
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState([]);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
+
+  const printStatusOptions = [
+    {
+      value: 'all',
+      label: 'All Cards',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-secondary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      )
+    },
+    {
+      value: 'printed',
+      label: 'Printed',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    },
+    {
+      value: 'not-printed',
+      label: 'Not Printed',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      )
+    }
+  ];
 
   // Initial data fetch
   useEffect(() => {
@@ -535,14 +567,24 @@ const RegistrationsPage = () => {
     }, 500);
   };
 
-  const filteredRegistrations = searchTerm
-    ? registrations.filter(
-        (reg) =>
-          reg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredRegistrations = registrations
+    .filter(reg => {
+      // First apply search filter
+      const matchesSearch = searchTerm
+        ? reg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           reg.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           reg.company.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : registrations;
+        : true;
+      
+      // Then apply print status filter
+      const matchesPrintStatus = printFilter === "all" 
+        ? true 
+        : printFilter === "printed" 
+          ? reg.cardPrinted 
+          : !reg.cardPrinted;
+      
+      return matchesSearch && matchesPrintStatus;
+    });
 
   // Loading skeleton
   const TableSkeleton = () => (
@@ -593,6 +635,16 @@ const RegistrationsPage = () => {
                 </svg>
               </button>
             </form>
+          </div>
+
+          {/* Replace the old select with CustomDropdown */}
+          <div className="flex items-center gap-3">
+            <CustomDropdown
+              label="Print Status"
+              value={printFilter}
+              options={printStatusOptions}
+              onChange={(value) => setPrintFilter(value)}
+            />
           </div>
         </div>
 

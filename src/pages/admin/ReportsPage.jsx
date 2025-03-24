@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, getDocs, where, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, Timestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
@@ -29,15 +29,10 @@ const ReportsPage = () => {
   });
 
   useEffect(() => {
-    fetchReportData();
-  }, []);
-
-  const fetchReportData = async () => {
     setLoading(true);
-    try {
-      const usersRef = collection(db, 'users');
-      const snapshot = await getDocs(usersRef);
-      
+    // Set up real-time listener
+    const usersRef = collection(db, 'users');
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
       const registrations = snapshot.docs.map(doc => ({
         ...doc.data(),
         docId: doc.id,
@@ -72,7 +67,7 @@ const ReportsPage = () => {
 
       // Convert byDate to array format and sort by date
       const registrationsByDate = Object.values(byDate)
-        .sort((a, b) => b.date.localeCompare(a.date)); // Sort by date in descending order
+        .sort((a, b) => b.date.localeCompare(a.date));
 
       // Group by company
       const byCompany = registrations.reduce((acc, reg) => {
@@ -130,13 +125,16 @@ const ReportsPage = () => {
         },
         printStats
       });
-    } catch (error) {
-      console.error('Error fetching report data:', error);
-      toast.error('Failed to load report data');
-    } finally {
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error('Error in real-time updates:', error);
+      toast.error('Failed to get real-time updates');
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []); // Empty dependency array since we want to set up the listener only once
 
   const handleExportCSV = () => {
     try {

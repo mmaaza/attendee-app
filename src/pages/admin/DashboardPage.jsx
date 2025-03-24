@@ -6,9 +6,7 @@ import {
   query,
   orderBy,
   limit,
-  getDocs,
-  where,
-  Timestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -110,30 +108,26 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalRegistrations: 0,
-    todayCheckins: 0,
-    availablePasses: 0,
+    checkedInCount: 0,
+    pendingCount: 0,
   });
   const [recentRegistrations, setRecentRegistrations] = useState([]);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
     setLoading(true);
-    try {
-      // Get recent registrations
-      const registrationsQuery = query(
-        collection(db, "users"),
-        orderBy("createdAt", "desc"),
-        limit(4)
-      );
+    // Set up real-time listener
+    const usersRef = collection(db, 'users');
+    const recentRegistrationsQuery = query(
+      usersRef,
+      orderBy('createdAt', 'desc'),
+      limit(4)
+    );
 
-      const querySnapshot = await getDocs(registrationsQuery);
-      const registrations = querySnapshot.docs.map((doc) => {
+    const unsubscribe = onSnapshot(recentRegistrationsQuery, (snapshot) => {
+      const registrations = snapshot.docs.map((doc) => {
         const data = doc.data();
-        const createdAt = data.createdAt?.toDate(); // Convert Firestore timestamp to JS Date
+        const createdAt = data.createdAt?.toDate();
         return {
           id: data.uid,
           name: `${data.fullName}`,
@@ -144,30 +138,31 @@ const DashboardPage = () => {
           status: "approved",
           company: data.company,
           createdAt: createdAt,
+          checkedIn: data.checkedIn || false,
         };
       });
 
       setRecentRegistrations(registrations);
 
-      // Get total registrations count
-      const totalRegistrationsSnapshot = await getDocs(collection(db, "users"));
-
-      // Get today's check-ins (if you have a check-ins collection)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Calculate stats from the total collection
+      const totalRegistrations = snapshot.size;
+      const checkedInCount = registrations.filter(reg => reg.checkedIn).length;
+      const pendingCount = totalRegistrations - checkedInCount;
 
       setStats({
-        totalRegistrations: totalRegistrationsSnapshot.size,
-        pendingApprovals: 0, // Update this if you implement an approval system
-        todayCheckins: 0, // Update this if you implement a check-in system
-        availablePasses: totalRegistrationsSnapshot.size, // Update this based on your business logic
+        totalRegistrations,
+        checkedInCount,
+        pendingCount,
       });
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error("Error fetching dashboard data:", error);
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []); // Empty dependency array since we want to set up the listener only once
 
   const handleViewDetails = (registration) => {
     setSelectedRegistration(registration);
@@ -228,10 +223,11 @@ const DashboardPage = () => {
             Total Registrations
           </h3>
         </div>
+
         <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
-            <div className="bg-primary-50 p-2 sm:p-3 rounded-xl">
-              <div className="text-primary-600">
+            <div className="bg-accent-50 p-2 sm:p-3 rounded-xl">
+              <div className="text-accent-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -252,18 +248,19 @@ const DashboardPage = () => {
               {loading ? (
                 <div className="h-8 w-12 bg-secondary-100 animate-pulse rounded"></div>
               ) : (
-                stats.todayCheckins
+                stats.checkedInCount
               )}
             </span>
           </div>
           <h3 className="mt-3 md:mt-4 text-sm md:text-base text-secondary-600 font-medium">
-            Today's Check-ins
+            Checked In
           </h3>
         </div>
+
         <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
-            <div className="bg-primary-50 p-2 sm:p-3 rounded-xl">
-              <div className="text-primary-600">
+            <div className="bg-secondary-50 p-2 sm:p-3 rounded-xl">
+              <div className="text-secondary-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6"
@@ -275,7 +272,7 @@ const DashboardPage = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
               </div>
@@ -284,12 +281,12 @@ const DashboardPage = () => {
               {loading ? (
                 <div className="h-8 w-12 bg-secondary-100 animate-pulse rounded"></div>
               ) : (
-                stats.availablePasses
+                stats.pendingCount
               )}
             </span>
           </div>
           <h3 className="mt-3 md:mt-4 text-sm md:text-base text-secondary-600 font-medium">
-            Available Passes
+            Pending Check-ins
           </h3>
         </div>
       </div>
