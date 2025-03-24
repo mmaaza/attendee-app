@@ -77,48 +77,48 @@ const LoginPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow-card">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-600 border-t-transparent"></div>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 flex items-center justify-center p-mobile-section">
+        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-card">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-4 border-primary-600 border-t-transparent mx-auto"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-card">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-100 flex items-center justify-center p-mobile-section sm:p-tablet-section lg:p-desktop-section">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8 bg-white p-6 sm:p-8 rounded-xl shadow-card">
         <div>
-          <h2 className="text-3xl font-bold font-display text-center text-secondary-900">
+          <h2 className="text-2xl sm:text-3xl font-bold font-display text-center text-secondary-900">
             {isInitialSetup ? 'Admin Setup' : 'Admin Login'}
           </h2>
-          <p className="mt-2 text-center text-secondary-600">
+          <p className="mt-2 text-sm sm:text-base text-center text-secondary-600">
             {isInitialSetup 
               ? 'Create your admin account to get started'
               : 'Sign in to access the admin dashboard'}
           </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={isInitialSetup ? handleInitialSetup : handleLogin}>
-          <div className="space-y-4">
+        <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6" onSubmit={isInitialSetup ? handleInitialSetup : handleLogin}>
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <label htmlFor="email" className="text-secondary-700 font-semibold">
+              <label htmlFor="email" className="text-sm sm:text-base text-secondary-700 font-semibold">
                 Email address
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="off"
+                autoComplete="email"
                 required
-                className="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                className="mt-1 block w-full px-3 py-2 sm:px-4 sm:py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
                 placeholder="admin@example.com"
                 value={credentials.email}
                 onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
               />
             </div>
             <div>
-              <label htmlFor="password" className="text-secondary-700 font-semibold">
+              <label htmlFor="password" className="text-sm sm:text-base text-secondary-700 font-semibold">
                 Password
               </label>
               <input
@@ -127,7 +127,7 @@ const LoginPage = () => {
                 type="password"
                 autoComplete={isInitialSetup ? 'new-password' : 'current-password'}
                 required
-                className="mt-1 block w-full px-4 py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
+                className="mt-1 block w-full px-3 py-2 sm:px-4 sm:py-3 border border-secondary-200 rounded-xl focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-colors"
                 placeholder="••••••••"
                 value={credentials.password}
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
@@ -136,19 +136,19 @@ const LoginPage = () => {
           </div>
 
           {isInitialSetup && (
-            <div className="rounded-xl bg-secondary-50 p-4 border border-secondary-200">
-              <div className="flex items-center space-x-3 text-secondary-600">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary-600" viewBox="0 0 20 20" fill="currentColor">
+            <div className="rounded-xl bg-secondary-50 p-3 sm:p-4 border border-secondary-200">
+              <div className="flex items-center space-x-2 sm:space-x-3 text-secondary-600">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-primary-600" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                <span className="text-sm">This is a one-time setup for the admin account.</span>
+                <span className="text-xs sm:text-sm">This is a one-time setup for the admin account.</span>
               </div>
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full bg-primary-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-primary-700 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 font-medium"
+            className="w-full bg-primary-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-md hover:shadow-lg hover:bg-primary-700 transform hover:-translate-y-1 transition-all duration-300 font-medium text-sm sm:text-base"
           >
             {isInitialSetup ? 'Create Admin Account' : 'Sign in'}
           </button>

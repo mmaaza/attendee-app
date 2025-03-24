@@ -73,15 +73,15 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-[280px] xs:w-64 bg-white border-r border-secondary-200 z-30 transform transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-[260px] xs:w-64 bg-white border-r border-secondary-200 z-30 transform transition-transform duration-300 md:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="h-full flex flex-col">
           {/* Logo Section */}
-          <div className="p-mobile-section md:p-4 border-b border-secondary-200">
+          <div className="px-mobile-section py-4 md:p-4 border-b border-secondary-200">
             <Link to="/admin/dashboard" className="flex items-center space-x-2">
-              <span className="text-xl xs:text-2xl font-display font-bold">
+              <span className="text-lg xs:text-xl md:text-2xl font-display font-bold">
                 <span className="text-primary-600">Nep</span>
                 <span className="text-secondary-900">Dent</span>
               </span>
@@ -89,28 +89,28 @@ const AdminLayout = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-mobile-section md:p-4 space-y-mobile-gap md:space-y-1">
+          <nav className="flex-1 overflow-y-auto px-mobile-section py-3 md:p-4 space-y-2 md:space-y-3">
             {navigationItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center space-x-3 px-3 xs:px-4 py-2.5 xs:py-3 rounded-xl transition-colors ${
+                className={`flex items-center space-x-2 md:space-x-3 px-3 py-2 md:px-4 md:py-3 rounded-xl transition-colors ${
                   location.pathname === item.path
                     ? 'bg-primary-50 text-primary-700'
                     : 'text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900'
                 }`}
               >
                 {item.icon}
-                <span className="font-medium text-sm xs:text-base">{item.name}</span>
+                <span className="font-medium text-sm md:text-base">{item.name}</span>
               </Link>
             ))}
           </nav>
 
           {/* User Section */}
-          <div className="p-mobile-section md:p-4 border-t border-secondary-200">
+          <div className="px-mobile-section py-3 md:p-4 border-t border-secondary-200">
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-3 w-full px-3 xs:px-4 py-2.5 xs:py-3 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-xl transition-colors text-sm xs:text-base"
+              className="flex items-center space-x-2 md:space-x-3 w-full px-3 py-2 md:px-4 md:py-3 text-secondary-600 hover:bg-secondary-50 hover:text-secondary-900 rounded-xl transition-colors text-sm md:text-base"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

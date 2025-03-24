@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 const CheckInPage = () => {
   const { id } = useParams();
   const [attendee, setAttendee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [checkInStatus, setCheckInStatus] = useState({
+    isCheckedIn: false,
+    isUpdating: false,
+    error: null
+  });
 
   useEffect(() => {
     async function fetchAttendee() {
@@ -19,7 +24,21 @@ const CheckInPage = () => {
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
-          setAttendee({ id: docSnap.id, ...docSnap.data() });
+          const attendeeData = { id: docSnap.id, ...docSnap.data() };
+          setAttendee(attendeeData);
+          
+          // Check if the attendee has already been checked in
+          if (!attendeeData.checkedIn) {
+            // Update check-in status
+            await updateAttendeeCheckInStatus(docRef, attendeeData);
+          } else {
+            setCheckInStatus({
+              isCheckedIn: true,
+              isUpdating: false,
+              error: null,
+              checkInTime: attendeeData.checkInTime?.toDate()
+            });
+          }
         } else {
           setError('No registration found with this ID');
         }
@@ -35,6 +54,41 @@ const CheckInPage = () => {
       fetchAttendee();
     }
   }, [id]);
+
+  async function updateAttendeeCheckInStatus(docRef, attendeeData) {
+    try {
+      setCheckInStatus(prev => ({ ...prev, isUpdating: true }));
+      
+      // Update Firestore document to mark the attendee as checked in
+      await updateDoc(docRef, {
+        checkedIn: true,
+        checkInTime: serverTimestamp()
+      });
+      
+      // Update local state
+      setAttendee(prev => ({
+        ...prev,
+        checkedIn: true,
+        checkInTime: new Date()
+      }));
+      
+      setCheckInStatus({
+        isCheckedIn: true,
+        isUpdating: false,
+        error: null,
+        checkInTime: new Date()
+      });
+      
+      console.log('Attendee successfully marked as checked in');
+    } catch (err) {
+      console.error('Error updating check-in status:', err);
+      setCheckInStatus(prev => ({
+        ...prev,
+        isUpdating: false,
+        error: 'Failed to update check-in status'
+      }));
+    }
+  }
 
   if (loading) {
     return (
@@ -82,8 +136,33 @@ const CheckInPage = () => {
             <h1 className="font-display text-3xl font-bold text-secondary-900 mb-2">
               Attendee Verified
             </h1>
-            <div className="bg-green-50 text-green-800 px-4 py-2 rounded-lg inline-block font-semibold text-xl">
-              USER REGISTERED
+            <div className="flex flex-col items-center gap-2">
+              <div className="bg-green-50 text-green-800 px-4 py-2 rounded-lg inline-block font-semibold text-xl">
+                USER REGISTERED
+              </div>
+              
+              {checkInStatus.isCheckedIn && (
+                <div className="bg-blue-50 text-blue-800 px-4 py-2 rounded-lg inline-block font-semibold">
+                  {checkInStatus.isUpdating ? 'CHECKING IN...' : 'CHECKED IN'} 
+                  {checkInStatus.checkInTime && (
+                    <span className="block text-sm font-normal mt-1">
+                      {checkInStatus.checkInTime.toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              {checkInStatus.error && (
+                <div className="bg-red-50 text-red-800 px-4 py-2 rounded-lg inline-block mt-1">
+                  {checkInStatus.error}
+                </div>
+              )}
             </div>
           </div>
           

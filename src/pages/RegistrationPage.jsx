@@ -236,7 +236,8 @@ const RegistrationPage = () => {
         ...formData,
         createdAt: new Date(), // Add a timestamp
         uid: customId,
-        cardPrinted: false
+        cardPrinted: false,
+        checkedIn: false
       });
 
       // Create notification for admin
