@@ -472,23 +472,6 @@ const RegistrationPage = () => {
             </p>
           </div>
         </form>
-
-        {/* Registration info */}
-        <div className="mt-8 bg-white p-5 rounded-xl shadow-sm border border-secondary-100">
-          <div className="flex items-start gap-3">
-            <div className="text-accent-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-secondary-900 font-semibold">Registration Information</h3>
-              <p className="text-secondary-600 text-sm mt-1">
-                After registration, you will receive a confirmation email with your attendee ID and detailed event information. For assistance, contact <span className="text-primary-600">support@nepdent.com</span>
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
