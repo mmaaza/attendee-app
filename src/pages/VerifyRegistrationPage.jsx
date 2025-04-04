@@ -4,6 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
+import QRCode from "qrcode";
 import fullLogo from "../assets/full-logo.png";
 import procareLogo from "../assets/procare-logo.png";
 import BadgePDF from "../components/BadgePDF";
@@ -252,7 +253,11 @@ const VerifyRegistrationPage = () => {
                 <button
                   onClick={async () => {
                     try {
-                      const blob = await pdf(<BadgePDF data={verifiedData} />).toBlob();
+                      // Generate QR code first
+                      const qrDataUrl = await QRCode.toDataURL(verifiedData.qrCodeUrl);
+                      const enrichedData = { ...verifiedData, qrDataUrl };
+                      
+                      const blob = await pdf(<BadgePDF data={enrichedData} />).toBlob();
                       const url = URL.createObjectURL(blob);
                       const link = document.createElement('a');
                       link.href = url;

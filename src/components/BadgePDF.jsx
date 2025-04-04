@@ -62,19 +62,16 @@ const styles = StyleSheet.create({
 });
 
 const BadgePDF = ({ data }) => {
-  const [qrDataUrl, setQrDataUrl] = React.useState('');
-
-  React.useEffect(() => {
-    const generateQR = async () => {
-      try {
-        const url = await QRCode.toDataURL(data.qrCodeUrl);
-        setQrDataUrl(url);
-      } catch (err) {
-        console.error('Error generating QR code:', err);
-      }
-    };
-    generateQR();
+  const qrDataUrl = React.useMemo(async () => {
+    try {
+      return await QRCode.toDataURL(data.qrCodeUrl);
+    } catch (err) {
+      console.error('Error generating QR code:', err);
+      return null;
+    }
   }, [data.qrCodeUrl]);
+
+  if (!qrDataUrl) return null;
 
   return (
     <Document>
@@ -104,7 +101,7 @@ const BadgePDF = ({ data }) => {
 
           <View style={styles.qrSection}>
             <Text style={styles.label}>Scan QR Code for Digital Pass</Text>
-            {qrDataUrl && <Image style={styles.qrCode} src={qrDataUrl} />}
+            <Image style={styles.qrCode} src={qrDataUrl} />
           </View>
 
           <View style={styles.footer}>
