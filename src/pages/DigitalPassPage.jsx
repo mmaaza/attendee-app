@@ -1,20 +1,60 @@
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { QRCodeSVG } from 'qrcode.react';
 
 const DigitalPassPage = () => {
   const location = useLocation();
+  const { id } = useParams();
   const [attendeeData, setAttendeeData] = useState(null);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    if (location.state) {
-      setAttendeeData(location.state);
+    async function fetchAttendeeData() {
+      try {
+        if (location.state) {
+          setAttendeeData(location.state);
+          setLoading(false);
+          return;
+        }
+
+        if (id) {
+          const docRef = doc(db, 'users', id);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            setAttendeeData({
+              ...docSnap.data(),
+              firstName: docSnap.data().fullName.split(' ')[0],
+              lastName: docSnap.data().fullName.split(' ').slice(1).join(' ')
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching attendee data:', error);
+      } finally {
+        setLoading(false);
+      }
     }
-    // In a real app, you might fetch the data using an ID from the URL
-  }, [location]);
+
+    fetchAttendeeData();
+  }, [id, location.state]);
 
   const handlePrint = () => {
     window.print();
   };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-secondary-700 text-lg">Loading digital pass...</p>
+        </div>
+      </div>
+    );
+  }
   
   if (!attendeeData) {
     return (
@@ -40,14 +80,14 @@ const DigitalPassPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12 relative">
-      {/* Decorative background elements */}
-      <div className="absolute top-0 left-0 -ml-20 -mt-20 w-64 h-64 bg-primary-100 rounded-full opacity-70 blur-3xl z-0"></div>
-      <div className="absolute bottom-0 right-0 -mr-16 -mb-16 w-72 h-72 bg-accent-50 rounded-full opacity-50 blur-3xl z-0"></div>
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-12 overflow-x-hidden">
+      {/* Decorative background elements - adjusted positioning */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-20 w-64 h-64 bg-primary-100 rounded-full opacity-70 blur-3xl z-0"></div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -mb-16 w-72 h-72 bg-accent-50 rounded-full opacity-50 blur-3xl z-0"></div>
       
       <div className="relative z-10">
         {/* Non-printable controls */}
-        <div className="mb-6 flex justify-between print:hidden">
+        <div className="mb-6 flex flex-col sm:flex-row gap-4 sm:gap-0 sm:justify-between print:hidden">
           <Link to="/" className="inline-flex items-center px-4 py-2 bg-secondary-100 text-secondary-700 font-medium rounded-xl hover:bg-secondary-200 transition-all duration-300">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -57,7 +97,7 @@ const DigitalPassPage = () => {
           
           <button 
             onClick={handlePrint}
-            className="inline-flex items-center px-6 py-2 bg-primary-600 text-white font-medium rounded-xl shadow-md hover:bg-primary-700 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+            className="inline-flex items-center justify-center px-6 py-2 bg-primary-600 text-white font-medium rounded-xl shadow-md hover:bg-primary-700 hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -69,9 +109,9 @@ const DigitalPassPage = () => {
         {/* Digital Pass Card - this will be printed */}
         <div className="bg-white rounded-2xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100 print:border-neutral-700 print:shadow-none">
           {/* Event name at the top */}
-          <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white p-6 text-center">
+          <div className="bg-gradient-to-r from-primary-600 to-primary-800 text-white p-4 sm:p-6 text-center">
             <h2 className="text-xl font-display font-bold print:text-black">Dental Trade Show 2025</h2>
-            <div className="flex items-center justify-center mt-2 text-sm text-primary-100 space-x-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center mt-2 text-sm text-primary-100 sm:space-x-4 space-y-2 sm:space-y-0">
               <div className="flex items-center print:text-neutral-700">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -88,24 +128,12 @@ const DigitalPassPage = () => {
             </div>
           </div>
           
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex flex-col md:flex-row gap-6 items-center">
-              {/* QR Code */}
-              <div className="flex flex-col items-center justify-center">
-                <div className="bg-secondary-50 p-4 rounded-xl border border-secondary-100 shadow-inner w-48 h-48 flex items-center justify-center relative">
-                  <div className="w-40 h-40 relative">
-                    {/* QR Code Border Animation */}
-                    <div className="absolute -inset-2 bg-gradient-to-r from-primary-300 via-accent-500 to-primary-300 rounded-lg opacity-50 animate-pulse"></div>
-                    {/* This would be an actual QR code in a production app */}
-                    <div className="relative bg-white border-2 border-secondary-200 w-full h-full grid grid-cols-6 grid-rows-6 gap-0.5 p-3 rounded-lg">
-                      {Array(36).fill().map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={`${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}`}>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+              {/* QR Code - made responsive */}
+              <div className="flex flex-col items-center justify-center w-full sm:w-auto">
+                <div className="bg-secondary-50 p-4 rounded-xl border border-secondary-100 shadow-inner w-full max-w-[12rem] h-48 flex items-center justify-center relative">
+                  <QRCodeSVG value={attendeeData.attendeeId} size={160} />
                 </div>
                 <div className="mt-2 text-xs text-center text-secondary-600 bg-primary-50 rounded-full px-3 py-1">
                   <span className="font-medium">Scan for verification</span>
@@ -162,7 +190,7 @@ const DigitalPassPage = () => {
           <div className="w-full text-center py-4 border-t border-secondary-100 bg-secondary-50">
             <p className="text-secondary-600 text-sm mb-1">Please present this pass at the entrance for verification</p>
             <a 
-              href="https://www.nepdent2025.com" 
+              href="https://www.nepdent.com" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-primary-600 hover:text-primary-800 transition-colors font-medium flex items-center justify-center"
@@ -170,7 +198,7 @@ const DigitalPassPage = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
-              www.nepdent2025.com
+              www.nepdent.com
             </a>
           </div>
         </div>

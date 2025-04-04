@@ -11,6 +11,7 @@ import AdminDashboardPage from './pages/admin/DashboardPage';
 import RegistrationsPage from './pages/admin/RegistrationsPage';
 import ReportsPage from './pages/admin/ReportsPage';
 import CheckInPage from './pages/CheckInPage';
+import QRScanPage from './pages/QRScanPage';
 import HomePageContentPage from './pages/admin/HomePageContentPage';
 import SettingsPage from './pages/admin/SettingsPage';
 import AuthGuard from './components/AuthGuard';
@@ -68,7 +69,8 @@ function App() {
           <Route path="register" element={<RegistrationPage />} />
           <Route path="registration-confirmation" element={<RegistrationConfirmationPage />} />
           <Route path="verify-registration" element={<VerifyRegistrationPage />} />
-          <Route path="digital-pass" element={<DigitalPassPage />} />
+          <Route path="digital-pass/:id" element={<DigitalPassPage />} />
+          <Route path="qr/:id" element={<QRScanPage />} />
           <Route path="check-in/:id" element={<CheckInPage />} />
         </Route>
         

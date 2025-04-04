@@ -255,8 +255,8 @@ const RegistrationPage = () => {
         }
       });
 
-      // Generate QR code URL with the Firestore document ID
-      const qrCodeUrl = `https://nepdent.netlify.app/check-in/${docRef.id}`;
+      // Generate QR code URL with the new qr scan route
+      const qrCodeUrl = `http://192.168.0.122:5173/qr/${docRef.id}`;
       
       // Update the document with the QR code URL
       await updateDoc(doc(db, 'users', docRef.id), {
