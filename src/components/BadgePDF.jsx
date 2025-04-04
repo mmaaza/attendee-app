@@ -4,7 +4,7 @@ import QRCode from 'qrcode';
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     padding: 20,
   },
   section: {
@@ -18,14 +18,31 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 20,
     textAlign: 'center',
+    padding: 15,
+    backgroundColor: '#0284c7', // primary-600
+    borderRadius: 8,
+  },
+  headerGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#075985', // primary-800
+    opacity: 0.5,
+    borderRadius: 8,
   },
   title: {
     fontSize: 24,
     marginBottom: 10,
+    color: '#ffffff',
+    fontFamily: 'Helvetica-Bold',
   },
   subtitle: {
     fontSize: 16,
     marginBottom: 20,
+    color: '#bae6fd', // primary-200
+    fontFamily: 'Helvetica',
   },
   content: {
     marginBottom: 20,
@@ -33,12 +50,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginBottom: 5,
-    color: '#475569',
+    color: '#475569', // secondary-600
+    fontFamily: 'Helvetica',
   },
   value: {
     fontSize: 14,
     marginBottom: 10,
-    fontWeight: 'bold',
+    color: '#0f172a', // secondary-900
+    fontFamily: 'Helvetica-Bold',
   },
   qrSection: {
     alignItems: 'center',
@@ -56,8 +75,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     textAlign: 'center',
-    color: '#475569',
+    color: '#475569', // secondary-600
     fontSize: 10,
+    fontFamily: 'Helvetica',
   },
 });
 
@@ -78,6 +98,7 @@ const BadgePDF = ({ data }) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.section}>
           <View style={styles.header}>
+            <View style={styles.headerGradient} />
             <Text style={styles.title}>Dental Trade Show 2025</Text>
             <Text style={styles.subtitle}>Attendee Badge</Text>
           </View>
