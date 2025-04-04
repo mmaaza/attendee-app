@@ -141,16 +141,18 @@ const ReportsPage = () => {
       const headers = ['User ID', 'Name', 'Email', 'Company', 'Country', 'Status', 'Date'];
       const csvData = [
         headers.join(','),
-        ...reportData.registrationsByDate.map(reg => 
-          [
-            reg.id,
-            reg.name,
-            reg.email,
-            reg.company,
-            reg.country,
-            reg.checkedIn ? 'Checked In' : 'Pending',
-            reg.date
-          ].join(',')
+        ...reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => 
+            [
+              reg.id,
+              reg.name,
+              reg.email,
+              reg.company,
+              reg.country,
+              reg.checkedIn ? 'Checked In' : 'Pending',
+              dateGroup.date
+            ].join(',')
+          )
         )
       ].join('\n');
 
@@ -171,15 +173,18 @@ const ReportsPage = () => {
   const handleExportExcel = () => {
     try {
       const worksheet = XLSX.utils.json_to_sheet(
-        reportData.registrationsByDate.map(reg => ({
-          'User ID': reg.id,
-          'Name': reg.name,
-          'Email': reg.email,
-          'Company': reg.company,
-          'Country': reg.country,
-          'Status': reg.checkedIn ? 'Checked In' : 'Pending',
-          'Date': reg.date
-        }))
+        reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => ({
+            'User ID': reg.id,
+            'Name': reg.name,
+            'Email': reg.email,
+            'Company': reg.company,
+            'Country': reg.country,
+            'Status': reg.checkedIn ? 'Checked In' : 'Pending',
+            'Print Status': reg.cardPrinted ? 'Printed' : 'Not Printed',
+            'Date': dateGroup.date
+          }))
+        )
       );
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
