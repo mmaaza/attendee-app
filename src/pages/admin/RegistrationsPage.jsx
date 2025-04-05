@@ -628,7 +628,7 @@ const RegistrationsPage = () => {
                     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
                     <script>
                       var qr = qrcode(0, 'M');
-                      qr.addData('http://192.168.0.122:5173/qr/${registration.id}');
+                      qr.addData('https://nepdent.com/qr/${registration.id}');
                       qr.make();
                       document.getElementById('qrcode').innerHTML = qr.createImgTag(3, 8);
                       var img = document.querySelector('#qrcode img');
