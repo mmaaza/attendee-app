@@ -72,7 +72,7 @@ const RegistrationConfirmationPage = () => {
           </h1>
 
           <p className="text-secondary-600 mb-8">
-            Thank you for registering for NepDent IDS 2025. Your registration
+            Thank you for registering for NEPDENT DTS 2025. Your registration
             has been confirmed.
           </p>
 

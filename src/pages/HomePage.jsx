@@ -330,11 +330,17 @@ const HomePage = () => {
           </div>
           
           <div className="rounded-xl overflow-hidden shadow-lg border border-secondary-200 h-60 md:h-80">
-            <div className="w-full h-full bg-center bg-cover" style={{backgroundImage: "url('https://maps.googleapis.com/maps/api/staticmap?center=Kathmandu,Nepal&zoom=14&size=600x400&markers=Kathmandu,Nepal&key=YOUR_API_KEY')"}}>
-              <div className="w-full h-full flex items-center justify-center bg-secondary-200">
-                <span className="text-secondary-600 text-sm md:text-base">Event Location Map</span>
-              </div>
-            </div>
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.546259132958!2d85.3181549!3d27.700415499999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19abe576ed91%3A0x9020b0f4c587cd3d!2sBhrikutimandap%20Exhibition%20Hall!5e0!3m2!1sen!2s!4v1743833097411!5m2!1sen!2s" 
+              width="100%" 
+              height="100%" 
+              style={{border: 0}} 
+              allowFullScreen="" 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Event Location Map"
+              className="w-full h-full"
+            />
           </div>
         </div>
       </div>
