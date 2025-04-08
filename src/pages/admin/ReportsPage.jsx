@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, where, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, Timestamp, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
@@ -57,6 +57,7 @@ const ReportsPage = () => {
           company: reg.company || 'Unknown',
           name: reg.fullName || 'Unknown',
           email: reg.email || 'Unknown',
+          phone: reg.mobileNumber || 'Unknown',
           checkedIn: reg.checkedIn || false,
           cardPrinted: reg.cardPrinted || false,
           country: reg.country || 'Unknown',
@@ -138,19 +139,22 @@ const ReportsPage = () => {
 
   const handleExportCSV = () => {
     try {
-      const headers = ['User ID', 'Name', 'Email', 'Company', 'Country', 'Status', 'Date'];
+      const headers = ['User ID', 'Name', 'Email', 'Phone', 'Company', 'Country', 'Status', 'Date'];
       const csvData = [
         headers.join(','),
-        ...reportData.registrationsByDate.map(reg => 
-          [
-            reg.id,
-            reg.name,
-            reg.email,
-            reg.company,
-            reg.country,
-            reg.checkedIn ? 'Checked In' : 'Pending',
-            reg.date
-          ].join(',')
+        ...reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => 
+            [
+              reg.id,
+              reg.name,
+              reg.email,
+              reg.phone,
+              reg.company,
+              reg.country,
+              reg.checkedIn ? 'Checked In' : 'Pending',
+              dateGroup.date
+            ].join(',')
+          )
         )
       ].join('\n');
 
@@ -171,15 +175,18 @@ const ReportsPage = () => {
   const handleExportExcel = () => {
     try {
       const worksheet = XLSX.utils.json_to_sheet(
-        reportData.registrationsByDate.map(reg => ({
-          'User ID': reg.id,
-          'Name': reg.name,
-          'Email': reg.email,
-          'Company': reg.company,
-          'Country': reg.country,
-          'Status': reg.checkedIn ? 'Checked In' : 'Pending',
-          'Date': reg.date
-        }))
+        reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => ({
+            'User ID': reg.id,
+            'Name': reg.name,
+            'Email': reg.email,
+            'Phone': reg.phone,
+            'Company': reg.company,
+            'Country': reg.country,
+            'Status': reg.checkedIn ? 'Checked In' : 'Pending',
+            'Date': dateGroup.date
+          }))
+        )
       );
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
@@ -212,12 +219,13 @@ const ReportsPage = () => {
       // Add registration table
       autoTable(doc, {
         startY: 60,
-        head: [['User ID', 'Name', 'Email', 'Company', 'Country', 'Check-in Status', 'Print Status', 'Date']],
+        head: [['User ID', 'Name', 'Email', 'Phone', 'Company', 'Country', 'Check-in Status', 'Print Status', 'Date']],
         body: reportData.registrationsByDate.flatMap(dateGroup => 
           dateGroup.registrations.map(reg => [
             reg.id,
             reg.name,
             reg.email,
+            reg.phone,
             reg.company,
             reg.country,
             reg.checkedIn ? 'Checked In' : 'Pending',
@@ -237,19 +245,22 @@ const ReportsPage = () => {
 
   const handleExportCSVByUser = () => {
     try {
-      const headers = ['User ID', 'Name', 'Email', 'Company', 'Country', 'Status', 'Date'];
+      const headers = ['User ID', 'Name', 'Email', 'Phone', 'Company', 'Country', 'Status', 'Date'];
       const csvData = [
         headers.join(','),
-        ...reportData.registrationsByDate.map(reg => 
-          [
-            reg.id,
-            reg.name,
-            reg.email,
-            reg.company,
-            reg.country,
-            reg.checkedIn ? 'Checked In' : 'Pending',
-            reg.date
-          ].join(',')
+        ...reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => 
+            [
+              reg.id,
+              reg.name,
+              reg.email,
+              reg.phone,
+              reg.company,
+              reg.country,
+              reg.checkedIn ? 'Checked In' : 'Pending',
+              dateGroup.date
+            ].join(',')
+          )
         )
       ].join('\n');
       const blob = new Blob([csvData], { type: 'text/csv' });
@@ -271,15 +282,16 @@ const ReportsPage = () => {
       const usersRef = collection(db, 'users');
       const snapshot = await getDocs(usersRef);
 
-      const headers = ['User ID', 'Name', 'Email', 'Company', 'Country', 'Status', 'Date'];
+      const headers = ['User ID', 'Name', 'Email', 'Phone', 'Company', 'Country', 'Status', 'Date'];
       const csvData = [
         headers.join(','),
         ...snapshot.docs.map(doc => {
           const data = doc.data();
           return [
             doc.id,
-            data.name || 'Unknown',
+            data.fullName || 'Unknown',
             data.email || 'Unknown',
+            data.mobileNumber || 'Unknown',
             data.company || 'Unknown',
             data.country || 'Unknown',
             data.checkedIn ? 'Checked In' : 'Pending',
@@ -312,8 +324,9 @@ const ReportsPage = () => {
         const userData = doc.data();
         return {
           'User ID': doc.id,
-          'Name': userData.name || 'Unknown',
+          'Name': userData.fullName || 'Unknown',
           'Email': userData.email || 'Unknown',
+          'Phone': userData.mobileNumber || 'Unknown',
           'Company': userData.company || 'Unknown',
           'Country': userData.country || 'Unknown',
           'Status': userData.checkedIn ? 'Checked In' : 'Pending',
@@ -347,8 +360,9 @@ const ReportsPage = () => {
         const userData = doc.data();
         return [
           doc.id,
-          userData.name || 'Unknown',
+          userData.fullName || 'Unknown',
           userData.email || 'Unknown',
+          userData.mobileNumber || 'Unknown',
           userData.company || 'Unknown',
           userData.country || 'Unknown',
           userData.checkedIn ? 'Checked In' : 'Pending',
@@ -358,7 +372,7 @@ const ReportsPage = () => {
 
       autoTable(doc, {
         startY: 25,
-        head: [['User ID', 'Name', 'Email', 'Company', 'Country', 'Status', 'Date']],
+        head: [['User ID', 'Name', 'Email', 'Phone', 'Company', 'Country', 'Status', 'Date']],
         body: data
       });
 

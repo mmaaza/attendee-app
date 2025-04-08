@@ -7,6 +7,7 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  where,
 } from "firebase/firestore";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -116,15 +117,34 @@ const DashboardPage = () => {
 
   useEffect(() => {
     setLoading(true);
-    // Set up real-time listener
+    
+    // Set up real-time listeners for stats and recent registrations
     const usersRef = collection(db, 'users');
+    
+    // Query for recent registrations (limited to 4)
     const recentRegistrationsQuery = query(
       usersRef,
       orderBy('createdAt', 'desc'),
       limit(4)
     );
-
-    const unsubscribe = onSnapshot(recentRegistrationsQuery, (snapshot) => {
+    
+    // Query for all registrations to get accurate total count
+    const totalRegistrationsQuery = query(usersRef);
+    
+    // Query for checked-in users
+    const checkedInQuery = query(
+      usersRef,
+      where('checkedIn', '==', true)
+    );
+    
+    // Query for pending users
+    const pendingQuery = query(
+      usersRef,
+      where('checkedIn', '==', false)
+    );
+    
+    // Fetch recent registrations
+    const recentUnsubscribe = onSnapshot(recentRegistrationsQuery, (snapshot) => {
       const registrations = snapshot.docs.map((doc) => {
         const data = doc.data();
         const createdAt = data.createdAt?.toDate();
@@ -143,25 +163,43 @@ const DashboardPage = () => {
       });
 
       setRecentRegistrations(registrations);
-
-      // Calculate stats from the total collection
-      const totalRegistrations = snapshot.size;
-      const checkedInCount = registrations.filter(reg => reg.checkedIn).length;
-      const pendingCount = totalRegistrations - checkedInCount;
-
-      setStats({
-        totalRegistrations,
-        checkedInCount,
-        pendingCount,
-      });
       setLoading(false);
     }, (error) => {
-      console.error("Error fetching dashboard data:", error);
+      console.error("Error fetching recent registrations:", error);
       setLoading(false);
     });
+    
+    // Fetch total registrations count
+    const totalUnsubscribe = onSnapshot(totalRegistrationsQuery, (snapshot) => {
+      const totalCount = snapshot.size;
+      setStats(prev => ({ ...prev, totalRegistrations: totalCount }));
+    }, (error) => {
+      console.error("Error fetching total registrations:", error);
+    });
+    
+    // Fetch checked-in count
+    const checkedInUnsubscribe = onSnapshot(checkedInQuery, (snapshot) => {
+      const checkedInCount = snapshot.size;
+      setStats(prev => ({ ...prev, checkedInCount }));
+    }, (error) => {
+      console.error("Error fetching checked-in users:", error);
+    });
+    
+    // Fetch pending count
+    const pendingUnsubscribe = onSnapshot(pendingQuery, (snapshot) => {
+      const pendingCount = snapshot.size;
+      setStats(prev => ({ ...prev, pendingCount }));
+    }, (error) => {
+      console.error("Error fetching pending users:", error);
+    });
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    // Cleanup subscriptions on unmount
+    return () => {
+      recentUnsubscribe();
+      totalUnsubscribe();
+      checkedInUnsubscribe();
+      pendingUnsubscribe();
+    };
   }, []); // Empty dependency array since we want to set up the listener only once
 
   const handleViewDetails = (registration) => {
@@ -188,7 +226,6 @@ const DashboardPage = () => {
           Dashboard Overview
         </h1>
       </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-mobile-gap md:gap-tablet-gap">
         <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
@@ -223,7 +260,6 @@ const DashboardPage = () => {
             Total Registrations
           </h3>
         </div>
-
         <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
             <div className="bg-accent-50 p-2 sm:p-3 rounded-xl">
@@ -256,7 +292,6 @@ const DashboardPage = () => {
             Checked In
           </h3>
         </div>
-
         <div className="bg-white p-mobile-section md:p-tablet-section rounded-xl shadow-card hover:shadow-xl transition-all duration-300 border border-secondary-100">
           <div className="flex items-center justify-between">
             <div className="bg-secondary-50 p-2 sm:p-3 rounded-xl">
@@ -290,16 +325,16 @@ const DashboardPage = () => {
           </h3>
         </div>
       </div>
-
       {/* Recent Registrations */}
       <div className="bg-white rounded-xl shadow-card p-mobile-section md:p-tablet-section">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-mobile-gap md:mb-tablet-gap">
           <h2 className="text-h3 md:text-h2 font-bold text-secondary-900">
             Recent Registrations
           </h2>
-          <button 
+          <button
             onClick={() => navigate('/admin/registrations')}
-            className="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+            className="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors"
+          >
             View All
           </button>
         </div>
@@ -338,9 +373,10 @@ const DashboardPage = () => {
                         {registration.time}
                       </td>
                       <td className="py-3 md:py-4">
-                        <button 
+                        <button
                           onClick={() => handleViewDetails(registration)}
-                          className="text-sm md:text-base text-primary-600 hover:text-primary-700 font-medium">
+                          className="text-sm md:text-base text-primary-600 hover:text-primary-700 font-medium"
+                        >
                           View Details
                         </button>
                       </td>
