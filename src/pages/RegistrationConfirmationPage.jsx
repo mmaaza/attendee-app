@@ -1,8 +1,10 @@
 import { useLocation, Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import fullLogo from "../assets/full-logo.png";
 import procareLogo from "../assets/procare-logo.png";
+import BadgePDF from "../components/BadgePDF";
 
 const RegistrationConfirmationPage = () => {
   const location = useLocation();
@@ -108,13 +110,33 @@ const RegistrationConfirmationPage = () => {
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center space-x-4">
             <Link
               to="/"
               className="bg-primary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-primary-700 transition-colors"
             >
               Return to Home
             </Link>
+            <PDFDownloadLink
+              document={
+                <BadgePDF
+                  data={{
+                    id: attendeeId,
+                    name: fullName,
+                    email: email,
+                    qrCodeUrl: qrCodeUrl,
+                    company: location.state?.company || "",
+                    jobTitle: location.state?.jobTitle || "",
+                  }}
+                />
+              }
+              fileName={`badge-${attendeeId}.pdf`}
+              className="bg-secondary-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-secondary-700 transition-colors"
+            >
+              {({ blob, url, loading, error }) =>
+                loading ? "Preparing badge..." : "Download Badge PDF"
+              }
+            </PDFDownloadLink>
           </div>
         </div>
       </div>

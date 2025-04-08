@@ -16,6 +16,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import toast from "react-hot-toast";
 import fullLogo from "../../assets/full-logo.png";
 import procareLogo from "../../assets/procare-logo.png";
+import everstImg from "../../assets/everstImg.webp";
 import CustomDropdown from '../../components/CustomDropdown';
 
 // Delete Confirmation Modal Component
@@ -443,112 +444,238 @@ const RegistrationsPage = () => {
           <title>Registration Card - ${registration.name}</title>
           <style>
             @page {
-              size: 54mm 85.6mm;
+              size: 11cm 16cm;
               margin: 0;
+            }
+            /* Force background colors to print */
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             body {
-              font-family: system-ui, -apple-system, sans-serif;
+              font-family: 'Inter', system-ui, -apple-system, sans-serif;
               margin: 0;
-              padding: 16px;
-              width: 54mm;
-              height: 85.6mm;
+              padding: 0;
+              width: 11cm;
+              height: 16cm;
               box-sizing: border-box;
-              border: 1px solid #e5e7eb;
+              background-color: #fff;
+              overflow: hidden;
             }
-            .container {
+            .badge-container {
               height: 100%;
               display: flex;
               flex-direction: column;
               justify-content: space-between;
+              position: relative;
+              box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.07);
+              border-radius: 12px;
+              overflow: hidden;
             }
-            .header {
+            .badge-header {
               display: flex;
               justify-content: center;
               align-items: center;
-              margin-bottom: 16px;
-              padding-bottom: 8px;
-              border-bottom: 1px solid #e5e7eb;
+              padding: 2rem 0;  /* Reduced padding to compensate for larger logo */
+              background-color: #0284c7; /* primary-600 */
+              background-image: url('${everstImg}');
+              background-size: cover;
+              background-position: center;
+              background-blend-mode: overlay;
+              color: white;
+              border-bottom: 1px solid #e2e8f0; /* secondary-200 */
+              position: relative;
             }
-            .header img {
-              height: 40px;
+            .badge-header::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background-color: rgba(2, 132, 199, 0.85); /* primary-600 with opacity */
+              z-index: 1;
             }
-            .content {
+            .logo-container {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              position: relative;
+              z-index: 2;
+            }
+            .nepdent-logo {
+              height: 64px;
+            }
+            .procare-logo {
+              height: 32px;
+            }
+            .badge-content {
               display: flex;
               flex-direction: column;
               align-items: center;
-              gap: 16px;
+              gap: 1rem;  /* Reduced gap */
+              padding: 1.5rem 1rem;  /* Reduced padding */
+              background-color: #f8fafc; /* secondary-50 */
+              flex: 1;
+            }
+            .qr-and-id {
+              display: flex;
+              align-items: flex-start;
+              gap: 1.5rem;
+              width: 100%;
+              justify-content: center;
+            }
+            .qr-container {
+              background-color: white;
+              padding: 0.75rem;
+              border-radius: 12px;
+              border: 1px solid #e2e8f0; /* secondary-200 */
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            }
+            .qr-container img {
+              width: 120px;
+              height: 120px;
+            }
+            .attendee-details {
+              margin-top: 2rem;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 0.5rem;
+              width: 100%;
+              padding: 0 1rem;
             }
             .label {
-              color: #666;
-              font-size: 0.75rem;
+              color: #64748b; /* secondary-500 */
+              font-size: 0.875rem;
               text-align: center;
+              font-weight: 500;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
             }
             .value {
-              color: #111827;
-              font-weight: bold;
+              color: #0f172a; /* secondary-900 */
+              font-weight: 600;
               text-align: center;
-              margin-bottom: 8px;
+              margin-bottom: 0.5rem;
             }
             .value.name {
-              font-size: 0.875rem;
+              font-size: 1.5rem;
+              font-weight: 700;
+              letter-spacing: -0.01em;
+              color: #0369a1; /* primary-700 */
+              margin-bottom: 0.25rem;
+            }
+            .value.company {
+              font-size: 1.125rem;
+              color: #475569; /* secondary-600 */
+              margin-bottom: 0;
+            }
+            .value.job {
+              font-size: 1rem;
+              color: #64748b; /* secondary-500 */
+              font-style: italic;
+              margin-bottom: 1rem;  /* Reduced margin */
             }
             .value.id {
-              font-size: 0.75rem;
+              font-size: 0.875rem;
+              font-family: monospace;
+              background-color: #e0f2fe; /* primary-100 */
+              padding: 0.25rem 0.75rem;
+              border-radius: 6px;
+              color: #0369a1; /* primary-700 */
             }
-            .footer {
+            .badge-footer {
               display: flex;
+              flex-direction: column;
               justify-content: center;
               align-items: center;
-              padding-top: 8px;
-              border-top: 1px solid #e5e7eb;
+              padding: 1rem 0;
+              background-color: white;
+              border-top: 1px solid #e2e8f0; /* secondary-200 */
             }
-            .footer img {
-              height: 28px;
+            .badge-footer .digital-partner {
+              font-size: 0.75rem;
+              color: #94a3b8; /* secondary-400 */
+              margin-top: 0.25rem;
+            }
+            .event-details {
+              position: absolute;
+              bottom: 5.5rem;
+              width: 100%;
+              text-align: center;
+              font-size: 0.875rem;
+              color: #64748b; /* secondary-500 */
+              padding: 0.5rem 0;
+              background-color: #f1f5f9; /* secondary-100 */
             }
           </style>
         </head>
         <body>
-          <div class="container">
-            <div class="header">
-              <img src="${fullLogo}" alt="NepDent Logo" />
-            </div>
-            <div class="content">
-              <div>
-                ${registration.qrCodeUrl ? 
-                  `<img src="${registration.qrCodeUrl}" alt="QR Code" style="width: 70px; height: 70px;" />` :
-                  `<div id="qrcode"></div>
-                  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-                  <script>
-                    var qr = qrcode(0, 'M');
-                    qr.addData('${registration.id}');
-                    qr.make();
-                    document.getElementById('qrcode').innerHTML = qr.createImgTag(2, 8);
-                    var img = document.querySelector('#qrcode img');
-                    img.style.width = '70px';
-                    img.style.height = '70px';
-                  </script>`
-                }
+          <div class="badge-container">
+            <div class="badge-header">
+              <div class="logo-container">
+                <img src="${fullLogo}" alt="NepDent Logo" class="nepdent-logo" />
               </div>
-              <div>
+            </div>
+            <div class="badge-content">
+              <div class="qr-and-id">
+                <div class="qr-container">
+                  ${registration.qrCodeUrl ? 
+                    `<img src="${registration.qrCodeUrl}" alt="QR Code" />` :
+                    `<div id="qrcode"></div>
+                    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+                    <script>
+                      var qr = qrcode(0, 'M');
+                      qr.addData('https://nepdent.com/qr/${registration.id}');
+                      qr.make();
+                      document.getElementById('qrcode').innerHTML = qr.createImgTag(3, 8);
+                      var img = document.querySelector('#qrcode img');
+                      img.style.width = '120px';
+                      img.style.height = '120px';
+                    </script>`
+                  }
+                </div>
+                <div>
+                  <div class="label">ID</div>
+                  <div class="value id">${registration.id}</div>
+                </div>
+              </div>
+              <div class="attendee-details">
                 <div class="label">Attendee</div>
                 <div class="value name">${registration.name}</div>
-                <div class="label">ID</div>
-                <div class="value id">${registration.id}</div>
+                ${registration.company ? `<div class="value company">${registration.company}</div>` : ''}
+                ${registration.jobTitle ? `<div class="value job">${registration.jobTitle}</div>` : 
+                 `<div class="value job">Dental Professional</div>`}
               </div>
             </div>
-            <div class="footer">
-              <img src="${procareLogo}" alt="Procare Logo" />
+            <div class="badge-footer">
+              <img src="${procareLogo}" alt="Procare Logo" class="procare-logo" />
+              <div class="digital-partner">Digital Partner</div>
             </div>
           </div>
+          <script>
+            // Force print dialog to show immediately
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            }
+            // Also show print colors
+            const style = document.createElement('style');
+            style.textContent = '@media print { @page { size: 11cm 16cm; margin: 0; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; } }';
+            document.head.appendChild(style);
+          </script>
         </body>
       </html>
     `;
     
     printWindow.document.write(content);
     printWindow.document.close();
-    setTimeout(async () => {
-      printWindow.print();
-      // Update the print status in Firestore
+    
+    // Let the browser handle the printing and wait for completion
+    printWindow.addEventListener('afterprint', async () => {
       try {
         await updateDoc(doc(db, 'users', registration.docId), {
           cardPrinted: true
@@ -564,7 +691,7 @@ const RegistrationsPage = () => {
         console.error('Error updating print status:', error);
         toast.error('Failed to update print status');
       }
-    }, 500);
+    });
   };
 
   const filteredRegistrations = registrations

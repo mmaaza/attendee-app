@@ -155,6 +155,18 @@ const ReportsPage = () => {
               dateGroup.date
             ].join(',')
           )
+        ...reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => 
+            [
+              reg.id,
+              reg.name,
+              reg.email,
+              reg.company,
+              reg.country,
+              reg.checkedIn ? 'Checked In' : 'Pending',
+              dateGroup.date
+            ].join(',')
+          )
         )
       ].join('\n');
 
@@ -184,6 +196,18 @@ const ReportsPage = () => {
             'Company': reg.company,
             'Country': reg.country,
             'Status': reg.checkedIn ? 'Checked In' : 'Pending',
+            'Date': dateGroup.date
+          }))
+        )
+        reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => ({
+            'User ID': reg.id,
+            'Name': reg.name,
+            'Email': reg.email,
+            'Company': reg.company,
+            'Country': reg.country,
+            'Status': reg.checkedIn ? 'Checked In' : 'Pending',
+            'Print Status': reg.cardPrinted ? 'Printed' : 'Not Printed',
             'Date': dateGroup.date
           }))
         )

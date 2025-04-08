@@ -1,0 +1,3 @@
+Title: Nepdent Attendee Management Application
+
+Description: This project is a web-based attendee management application designed specifically for the Nepdent event. It streamlines event registration, check-ins, and digital pass generation. Built with modern web technologies like React, Tailwind CSS, and Firebase, the application features an intuitive user interface and robust functionality. Key components include an admin dashboard, registration pages, and real-time notifications. The app is optimized for performance and scalability, making it suitable for events of all sizes.

@@ -3,18 +3,17 @@ import { toast } from "react-hot-toast";
 import { QRCodeSVG } from "qrcode.react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
+import { PDFDownloadLink, pdf } from '@react-pdf/renderer';
+import QRCode from "qrcode";
 import fullLogo from "../assets/full-logo.png";
 import procareLogo from "../assets/procare-logo.png";
+import BadgePDF from "../components/BadgePDF";
 
 const VerifyRegistrationPage = () => {
   const [searchType, setSearchType] = useState("id");
   const [searchValue, setSearchValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [verifiedData, setVerifiedData] = useState(null);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -252,10 +251,28 @@ const VerifyRegistrationPage = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
-                  onClick={handlePrint}
+                  onClick={async () => {
+                    try {
+                      // Generate QR code first
+                      const qrDataUrl = await QRCode.toDataURL(verifiedData.qrCodeUrl);
+                      const enrichedData = { ...verifiedData, qrDataUrl };
+                      
+                      const blob = await pdf(<BadgePDF data={enrichedData} />).toBlob();
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${verifiedData.id}-badge.pdf`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                      toast.success('PDF downloaded successfully!');
+                    } catch (error) {
+                      console.error('Error generating PDF:', error);
+                      toast.error('Failed to generate PDF. Please try again.');
+                    }
+                  }}
                   className="w-full bg-primary-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg hover:bg-primary-700 hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                 >
-                  Print Badge
+                  Download Badge PDF
                 </button>
                 <button
                   onClick={() => {
