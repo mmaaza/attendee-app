@@ -508,7 +508,7 @@ const RegistrationsPage = () => {
               height: 64px;
             }
             .procare-logo {
-              height: 32px;
+              height: 60px;
             }
             .badge-content {
               display: flex;
@@ -521,8 +521,8 @@ const RegistrationsPage = () => {
             }
             .qr-and-id {
               display: flex;
-              align-items: flex-start;
-              gap: 1.5rem;
+              flex-direction: column;
+              align-items: center;
               width: 100%;
               justify-content: center;
             }
@@ -538,7 +538,7 @@ const RegistrationsPage = () => {
               height: 120px;
             }
             .attendee-details {
-              margin-top: 2rem;
+              margin-top: 1rem;
               display: flex;
               flex-direction: column;
               align-items: center;
@@ -588,7 +588,7 @@ const RegistrationsPage = () => {
             }
             .badge-footer {
               display: flex;
-              flex-direction: column;
+              flex-direction: row-reverse;
               justify-content: center;
               align-items: center;
               padding: 1rem 0;
@@ -596,8 +596,8 @@ const RegistrationsPage = () => {
               border-top: 1px solid #e2e8f0; /* secondary-200 */
             }
             .badge-footer .digital-partner {
-              font-size: 0.75rem;
-              color: #94a3b8; /* secondary-400 */
+              font-size: 0.4rem;
+              color: #333333; /* secondary-400 */
               margin-top: 0.25rem;
             }
             .event-details {
@@ -621,6 +621,9 @@ const RegistrationsPage = () => {
             </div>
             <div class="badge-content">
               <div class="qr-and-id">
+                <div>
+                    <div class="value id">${registration.id}</div>
+                </div>
                 <div class="qr-container">
                   ${registration.qrCodeUrl ? 
                     `<img src="${registration.qrCodeUrl}" alt="QR Code" />` :
@@ -637,10 +640,7 @@ const RegistrationsPage = () => {
                     </script>`
                   }
                 </div>
-                <div>
-                  <div class="label">ID</div>
-                  <div class="value id">${registration.id}</div>
-                </div>
+                
               </div>
               <div class="attendee-details">
                 <div class="label">Attendee</div>
@@ -652,7 +652,8 @@ const RegistrationsPage = () => {
             </div>
             <div class="badge-footer">
               <img src="${procareLogo}" alt="Procare Logo" class="procare-logo" />
-              <div class="digital-partner">Digital Partner</div>
+              <div class="digital-partner"><h1>Digitally Powered By:</h1></div>
+              
             </div>
           </div>
           <script>
