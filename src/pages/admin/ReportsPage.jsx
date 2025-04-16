@@ -184,17 +184,6 @@ const ReportsPage = () => {
             'Company': reg.company,
             'Country': reg.country,
             'Status': reg.checkedIn ? 'Checked In' : 'Pending',
-            'Date': dateGroup.date
-          }))
-        )
-        reportData.registrationsByDate.flatMap(dateGroup => 
-          dateGroup.registrations.map(reg => ({
-            'User ID': reg.id,
-            'Name': reg.name,
-            'Email': reg.email,
-            'Company': reg.company,
-            'Country': reg.country,
-            'Status': reg.checkedIn ? 'Checked In' : 'Pending',
             'Print Status': reg.cardPrinted ? 'Printed' : 'Not Printed',
             'Date': dateGroup.date
           }))
