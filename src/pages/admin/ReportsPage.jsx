@@ -187,6 +187,18 @@ const ReportsPage = () => {
             'Date': dateGroup.date
           }))
         )
+        reportData.registrationsByDate.flatMap(dateGroup => 
+          dateGroup.registrations.map(reg => ({
+            'User ID': reg.id,
+            'Name': reg.name,
+            'Email': reg.email,
+            'Company': reg.company,
+            'Country': reg.country,
+            'Status': reg.checkedIn ? 'Checked In' : 'Pending',
+            'Print Status': reg.cardPrinted ? 'Printed' : 'Not Printed',
+            'Date': dateGroup.date
+          }))
+        )
       );
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Registrations');
