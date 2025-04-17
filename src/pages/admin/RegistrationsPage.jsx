@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { db } from "../../../firebase";
 import {
   collection,
@@ -18,6 +18,7 @@ import fullLogo from "../../assets/full-logo.png";
 import procareLogo from "../../assets/procare-logo.png";
 import everstImg from "../../assets/everstImg.webp";
 import CustomDropdown from '../../components/CustomDropdown';
+import debounce from 'lodash/debounce';
 
 // Delete Confirmation Modal Component
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itemCount }) => {
@@ -235,59 +236,54 @@ const RegistrationsPage = () => {
   const fetchRegistrations = async (searchAfter = null) => {
     setLoading(true);
     try {
-      let registrationsQuery;
-      // Base query
       let baseQuery;
-
+      
       if (searchTerm) {
-        // If there's a search term, we'll use multiple queries and combine the results
-        const nameQuery = query(
-          collection(db, "users"),
-          orderBy("fullName"),
-          where("fullName", ">=", searchTerm),
-          where("fullName", "<=", searchTerm + "\uf8ff")
+        // Create a compound query for search
+        const searchQueries = [
+          query(
+            collection(db, "users"),
+            orderBy("fullName"),
+            where("fullName", ">=", searchTerm.toLowerCase()),
+            where("fullName", "<=", searchTerm.toLowerCase() + "\uf8ff"),
+            limit(pageSize)
+          ),
+          query(
+            collection(db, "users"),
+            orderBy("email"),
+            where("email", ">=", searchTerm.toLowerCase()),
+            where("email", "<=", searchTerm.toLowerCase() + "\uf8ff"),
+            limit(pageSize)
+          ),
+          query(
+            collection(db, "users"),
+            orderBy("company"),
+            where("company", ">=", searchTerm.toLowerCase()),
+            where("company", "<=", searchTerm.toLowerCase() + "\uf8ff"),
+            limit(pageSize)
+          )
+        ];
+
+        // Execute all queries in parallel
+        const querySnapshots = await Promise.all(
+          searchQueries.map(q => getDocs(q))
         );
 
-        const emailQuery = query(
-          collection(db, "users"),
-          orderBy("email"),
-          where("email", ">=", searchTerm),
-          where("email", "<=", searchTerm + "\uf8ff")
-        );
-
-        const companyQuery = query(
-          collection(db, "users"),
-          orderBy("company"),
-          where("company", ">=", searchTerm),
-          where("company", "<=", searchTerm + "\uf8ff")
-        );
-
-        // Execute all three queries
-        const [nameSnapshot, emailSnapshot, companySnapshot] = await Promise.all([
-          getDocs(nameQuery),
-          getDocs(emailQuery),
-          getDocs(companyQuery)
-        ]);
-
-        // Combine and deduplicate results (by document ID)
-        const combinedDocs = [...nameSnapshot.docs, ...emailSnapshot.docs, ...companySnapshot.docs];
+        // Combine and deduplicate results
+        const allDocs = querySnapshots.flatMap(snapshot => snapshot.docs);
         const uniqueDocs = Array.from(
-          new Map(combinedDocs.map(doc => [doc.id, doc])).values()
+          new Map(allDocs.map(doc => [doc.id, doc])).values()
         );
-
-        // For search results, we'll handle the data directly without pagination
-        setHasMore(false);
-        setLastVisible(null);
 
         // Format the data
         const registrationsData = uniqueDocs.map((doc) => {
           const data = doc.data();
           return {
-            id: data.uid,
+            id: data.uid || doc.id,
             docId: doc.id,
-            name: data.fullName,
+            name: data.fullName || "N/A",
             company: data.company || "N/A",
-            email: data.email,
+            email: data.email || "N/A",
             createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
             formattedCreatedAt: data.createdAt
               ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
@@ -298,62 +294,59 @@ const RegistrationsPage = () => {
         });
 
         setRegistrations(registrationsData);
-        setLoading(false);
-        return;
+        setHasMore(false); // Disable pagination for search results
       } else {
-        // Standard pagination query without search term
+        // Standard pagination query without search
         baseQuery = query(
           collection(db, "users"),
           orderBy("createdAt", "desc")
         );
-      }
 
-      // Add pagination
-      if (searchAfter) {
-        registrationsQuery = query(
-          baseQuery,
-          startAfter(searchAfter),
-          limit(pageSize)
-        );
-      } else {
-        registrationsQuery = query(baseQuery, limit(pageSize));
-      }
+        if (searchAfter) {
+          baseQuery = query(
+            baseQuery,
+            startAfter(searchAfter),
+            limit(pageSize)
+          );
+        } else {
+          baseQuery = query(
+            baseQuery,
+            limit(pageSize)
+          );
+        }
 
-      const querySnapshot = await getDocs(registrationsQuery);
+        const querySnapshot = await getDocs(baseQuery);
+        
+        // Check if we have more results
+        setHasMore(querySnapshot.docs.length === pageSize);
 
-      // Check if we have more results
-      setHasMore(querySnapshot.docs.length === pageSize);
+        // Save the last document for pagination
+        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1] || null);
 
-      // Save the last document for pagination
-      if (querySnapshot.docs.length > 0) {
-        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-      } else {
-        setLastVisible(null);
-      }
+        // Format the data
+        const registrationsData = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: data.uid || doc.id,
+            docId: doc.id,
+            name: data.fullName || "N/A",
+            company: data.company || "N/A",
+            email: data.email || "N/A",
+            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+            formattedCreatedAt: data.createdAt
+              ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
+              : "Unknown",
+            phone: data.mobileNumber || "N/A",
+            cardPrinted: data.cardPrinted || false
+          };
+        });
 
-      // Format the data
-      const registrationsData = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: data.uid,
-          docId: doc.id,
-          name: data.fullName,
-          company: data.company || "N/A",
-          email: data.email,
-          createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
-          formattedCreatedAt: data.createdAt
-            ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
-            : "Unknown",
-          phone: data.mobileNumber || "N/A",
-          cardPrinted: data.cardPrinted || false
-        };
-      });
-
-      // If loading more, append data; otherwise, replace
-      if (searchAfter && !searchTerm) {
-        setRegistrations((prev) => [...prev, ...registrationsData]);
-      } else {
-        setRegistrations(registrationsData);
+        // If loading more, append data; otherwise, replace
+        if (searchAfter) {
+          setRegistrations((prev) => [...prev, ...registrationsData]);
+        } else {
+          setRegistrations(registrationsData);
+        }
       }
     } catch (error) {
       console.error("Error fetching registrations:", error);
@@ -369,12 +362,87 @@ const RegistrationsPage = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    // Reset pagination when searching
-    setLastVisible(null);
-    fetchRegistrations();
-  };
+  // Modify the debouncedSearch implementation
+  const debouncedSearch = useCallback(
+    debounce(async () => {
+      setLastVisible(null);
+      setLoading(true);
+      try {
+        const searchQueries = [
+          query(
+            collection(db, "users"),
+            orderBy("fullName"),
+            where("fullName", ">=", searchTerm.toLowerCase()),
+            where("fullName", "<=", searchTerm.toLowerCase() + "\uf8ff"),
+            limit(pageSize)
+          ),
+          query(
+            collection(db, "users"),
+            orderBy("email"),
+            where("email", ">=", searchTerm.toLowerCase()),
+            where("email", "<=", searchTerm.toLowerCase() + "\uf8ff"),
+            limit(pageSize)
+          ),
+          query(
+            collection(db, "users"),
+            orderBy("company"),
+            where("company", ">=", searchTerm.toLowerCase()),
+            where("company", "<=", searchTerm.toLowerCase() + "\uf8ff"),
+            limit(pageSize)
+          )
+        ];
+
+        const querySnapshots = await Promise.all(
+          searchQueries.map(q => getDocs(q))
+        );
+
+        const allDocs = querySnapshots.flatMap(snapshot => snapshot.docs);
+        const uniqueDocs = Array.from(
+          new Map(allDocs.map(doc => [doc.id, doc])).values()
+        );
+
+        const registrationsData = uniqueDocs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: data.uid || doc.id,
+            docId: doc.id,
+            name: data.fullName || "N/A",
+            company: data.company || "N/A",
+            email: data.email || "N/A",
+            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+            formattedCreatedAt: data.createdAt
+              ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
+              : "Unknown",
+            phone: data.mobileNumber || "N/A",
+            cardPrinted: data.cardPrinted || false
+          };
+        });
+
+        setRegistrations(registrationsData);
+        setHasMore(false);
+      } catch (error) {
+        console.error("Error in search:", error);
+        toast.error("Search failed");
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    [searchTerm, pageSize] // Add dependencies here
+  );
+
+  // Update the useEffect to use the new debouncedSearch
+  useEffect(() => {
+    if (searchTerm) {
+      debouncedSearch();
+    } else {
+      debouncedSearch.cancel();
+      fetchRegistrations();
+    }
+
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchTerm, debouncedSearch]);
 
   const toggleSelectRegistration = (id) => {
     setSelectedRegistrations((prev) => {
@@ -712,34 +780,15 @@ const RegistrationsPage = () => {
       <div className="bg-white rounded-xl shadow-card p-4 sm:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
           <div className="flex-1 min-w-0">
-            <form onSubmit={handleSearch} className="flex w-full">
+            <div className="flex w-full">
               <input
                 type="text"
                 placeholder="Search by name, email or company..."
-                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-secondary-200 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-primary-500 w-full"
+                className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button
-                type="submit"
-                className="px-3 sm:px-4 py-2.5 sm:py-3 bg-primary-600 text-white rounded-r-xl hover:bg-primary-700 transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </button>
-            </form>
+            </div>
           </div>
 
           {/* Replace the old select with CustomDropdown */}
