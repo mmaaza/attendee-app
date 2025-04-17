@@ -453,10 +453,10 @@ const RegistrationsPage = () => {
               overflow: hidden;
             }
             .badge-content {
-              margin: 4rem;
+              margin: -8rem;
               display: flex;
               flex-direction: row;
-            
+              align-items: center;
               gap: 1rem;
               padding: 1rem;
               background-color: #f8fafc; /* secondary-50 */
