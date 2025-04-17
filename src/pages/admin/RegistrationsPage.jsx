@@ -613,7 +613,7 @@ const RegistrationsPage = () => {
           : !reg.cardPrinted;
     });
 
-  // Loading skeleton
+  // Loading skeleton - to be shown while data is being fetched
   const TableSkeleton = () => (
     <div className="animate-pulse">
       {[1, 2, 3, 4, 5].map((item) => (
