@@ -430,8 +430,8 @@ const RegistrationsPage = () => {
           <title>Registration Card - ${registration.name}</title>
           <style>
             @page {
-              size: auto;
-              margin: 0mm;
+              size: 10cm 14cm;
+              margin: 0;
             }
             /* Force background colors to print */
             * {
@@ -448,12 +448,14 @@ const RegistrationsPage = () => {
               display: flex;
               align-items: center;
               justify-content: center;
-              height: 100%;
-              width: 100%;
+              width: 10cm;
+              height: 14cm;
+              overflow: hidden;
             }
             .badge-content {
+              margin: 1rem;
               display: flex;
-              flex-direction: column;
+              flex-direction: row;
               align-items: center;
               gap: 1rem;
               padding: 1rem;
