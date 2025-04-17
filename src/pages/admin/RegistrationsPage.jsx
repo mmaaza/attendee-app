@@ -453,8 +453,8 @@ const RegistrationsPage = () => {
               overflow: hidden;
             }
             .badge-content {
-              margin: 1rem;
-              margin-top: 8rem;
+              margin-left: 4rem;
+              margin-top: 4rem;
               display: flex;
               flex-direction: row;
               align-items: center;
