@@ -7,8 +7,6 @@ import {
   getDocs,
   doc,
   deleteDoc,
-  startAfter,
-  limit,
   where,
   updateDoc,
 } from "firebase/firestore";
@@ -188,12 +186,9 @@ const DetailsModal = ({ isOpen, onClose, registration }) => {
 const RegistrationsPage = () => {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [lastVisible, setLastVisible] = useState(null);
-  const [hasMore, setHasMore] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegistrations, setSelectedRegistrations] = useState([]);
-  const [printFilter, setPrintFilter] = useState("all"); // Add print filter state
-  const pageSize = 10;
+  const [printFilter, setPrintFilter] = useState("all");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [itemsToDelete, setItemsToDelete] = useState([]);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
@@ -233,121 +228,45 @@ const RegistrationsPage = () => {
     fetchRegistrations();
   }, []);
 
-  const fetchRegistrations = async (searchAfter = null) => {
+  const fetchRegistrations = async () => {
     setLoading(true);
     try {
-      let baseQuery;
+      // Basic query to get all records
+      const baseQuery = query(
+        collection(db, "users"),
+        orderBy("createdAt", "desc")
+      );
+
+      const querySnapshot = await getDocs(baseQuery);
       
+      let registrationsData = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: data.uid || doc.id,
+          docId: doc.id,
+          name: data.fullName || "N/A",
+          company: data.company || "N/A",
+          email: data.email || "N/A",
+          createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+          formattedCreatedAt: data.createdAt
+            ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
+            : "Unknown",
+          phone: data.mobileNumber || "N/A",
+          cardPrinted: data.cardPrinted || false
+        };
+      });
+
+      // If there's a search term, filter the results client-side
       if (searchTerm) {
-        // Create a compound query for search
-        const searchQueries = [
-          query(
-            collection(db, "users"),
-            orderBy("fullName"),
-            where("fullName", ">=", searchTerm.toLowerCase()),
-            where("fullName", "<=", searchTerm.toLowerCase() + "\uf8ff"),
-            limit(pageSize)
-          ),
-          query(
-            collection(db, "users"),
-            orderBy("email"),
-            where("email", ">=", searchTerm.toLowerCase()),
-            where("email", "<=", searchTerm.toLowerCase() + "\uf8ff"),
-            limit(pageSize)
-          ),
-          query(
-            collection(db, "users"),
-            orderBy("company"),
-            where("company", ">=", searchTerm.toLowerCase()),
-            where("company", "<=", searchTerm.toLowerCase() + "\uf8ff"),
-            limit(pageSize)
-          )
-        ];
-
-        // Execute all queries in parallel
-        const querySnapshots = await Promise.all(
-          searchQueries.map(q => getDocs(q))
+        const searchLower = searchTerm.toLowerCase();
+        registrationsData = registrationsData.filter(reg => 
+          reg.name.toLowerCase().includes(searchLower) ||
+          reg.email.toLowerCase().includes(searchLower) ||
+          reg.company.toLowerCase().includes(searchLower)
         );
-
-        // Combine and deduplicate results
-        const allDocs = querySnapshots.flatMap(snapshot => snapshot.docs);
-        const uniqueDocs = Array.from(
-          new Map(allDocs.map(doc => [doc.id, doc])).values()
-        );
-
-        // Format the data
-        const registrationsData = uniqueDocs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: data.uid || doc.id,
-            docId: doc.id,
-            name: data.fullName || "N/A",
-            company: data.company || "N/A",
-            email: data.email || "N/A",
-            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
-            formattedCreatedAt: data.createdAt
-              ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
-              : "Unknown",
-            phone: data.mobileNumber || "N/A",
-            cardPrinted: data.cardPrinted || false
-          };
-        });
-
-        setRegistrations(registrationsData);
-        setHasMore(false); // Disable pagination for search results
-      } else {
-        // Standard pagination query without search
-        baseQuery = query(
-          collection(db, "users"),
-          orderBy("createdAt", "desc")
-        );
-
-        if (searchAfter) {
-          baseQuery = query(
-            baseQuery,
-            startAfter(searchAfter),
-            limit(pageSize)
-          );
-        } else {
-          baseQuery = query(
-            baseQuery,
-            limit(pageSize)
-          );
-        }
-
-        const querySnapshot = await getDocs(baseQuery);
-        
-        // Check if we have more results
-        setHasMore(querySnapshot.docs.length === pageSize);
-
-        // Save the last document for pagination
-        setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1] || null);
-
-        // Format the data
-        const registrationsData = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: data.uid || doc.id,
-            docId: doc.id,
-            name: data.fullName || "N/A",
-            company: data.company || "N/A",
-            email: data.email || "N/A",
-            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
-            formattedCreatedAt: data.createdAt
-              ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
-              : "Unknown",
-            phone: data.mobileNumber || "N/A",
-            cardPrinted: data.cardPrinted || false
-          };
-        });
-
-        // If loading more, append data; otherwise, replace
-        if (searchAfter) {
-          setRegistrations((prev) => [...prev, ...registrationsData]);
-        } else {
-          setRegistrations(registrationsData);
-        }
       }
+
+      setRegistrations(registrationsData);
     } catch (error) {
       console.error("Error fetching registrations:", error);
       toast.error("Failed to load registrations");
@@ -356,81 +275,14 @@ const RegistrationsPage = () => {
     }
   };
 
-  const loadMore = () => {
-    if (lastVisible && !searchTerm) {
-      fetchRegistrations(lastVisible);
-    }
-  };
-
-  // Modify the debouncedSearch implementation
+  // Modify debouncedSearch to just call fetchRegistrations
   const debouncedSearch = useCallback(
-    debounce(async () => {
-      setLastVisible(null);
-      setLoading(true);
-      try {
-        const searchQueries = [
-          query(
-            collection(db, "users"),
-            orderBy("fullName"),
-            where("fullName", ">=", searchTerm.toLowerCase()),
-            where("fullName", "<=", searchTerm.toLowerCase() + "\uf8ff"),
-            limit(pageSize)
-          ),
-          query(
-            collection(db, "users"),
-            orderBy("email"),
-            where("email", ">=", searchTerm.toLowerCase()),
-            where("email", "<=", searchTerm.toLowerCase() + "\uf8ff"),
-            limit(pageSize)
-          ),
-          query(
-            collection(db, "users"),
-            orderBy("company"),
-            where("company", ">=", searchTerm.toLowerCase()),
-            where("company", "<=", searchTerm.toLowerCase() + "\uf8ff"),
-            limit(pageSize)
-          )
-        ];
-
-        const querySnapshots = await Promise.all(
-          searchQueries.map(q => getDocs(q))
-        );
-
-        const allDocs = querySnapshots.flatMap(snapshot => snapshot.docs);
-        const uniqueDocs = Array.from(
-          new Map(allDocs.map(doc => [doc.id, doc])).values()
-        );
-
-        const registrationsData = uniqueDocs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: data.uid || doc.id,
-            docId: doc.id,
-            name: data.fullName || "N/A",
-            company: data.company || "N/A",
-            email: data.email || "N/A",
-            createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
-            formattedCreatedAt: data.createdAt
-              ? formatDistanceToNow(data.createdAt.toDate(), { addSuffix: true })
-              : "Unknown",
-            phone: data.mobileNumber || "N/A",
-            cardPrinted: data.cardPrinted || false
-          };
-        });
-
-        setRegistrations(registrationsData);
-        setHasMore(false);
-      } catch (error) {
-        console.error("Error in search:", error);
-        toast.error("Search failed");
-      } finally {
-        setLoading(false);
-      }
+    debounce(() => {
+      fetchRegistrations();
     }, 500),
-    [searchTerm, pageSize] // Add dependencies here
+    [searchTerm]
   );
 
-  // Update the useEffect to use the new debouncedSearch
   useEffect(() => {
     if (searchTerm) {
       debouncedSearch();
@@ -751,7 +603,6 @@ const RegistrationsPage = () => {
 
   const filteredRegistrations = registrations
     .filter(reg => {
-      // Only apply print status filter since search is now handled server-side
       return printFilter === "all" 
         ? true 
         : printFilter === "printed" 
@@ -843,210 +694,193 @@ const RegistrationsPage = () => {
       {/* Registrations Table */}
       <div className="bg-white rounded-xl shadow-card p-3 sm:p-6">
         <div className="overflow-x-auto -mx-3 sm:mx-0">
-          {loading && registrations.length === 0 ? (
+          {loading ? (
             <TableSkeleton />
           ) : (
-            <>
-              <div className="min-w-full inline-block align-middle">
-                <div className="overflow-hidden">
-                  <table className="min-w-full divide-y divide-secondary-200">
-                    <thead>
-                      <tr className="text-left">
-                        <th scope="col" className="px-3 sm:pl-4 py-3">
-                          <input
-                            type="checkbox"
-                            checked={
-                              selectedRegistrations.length ===
-                                registrations.length && registrations.length > 0
-                            }
-                            onChange={selectAllRegistrations}
-                            className="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
-                          />
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
+            <div className="min-w-full inline-block align-middle">
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-secondary-200">
+                  <thead>
+                    <tr className="text-left">
+                      <th scope="col" className="px-3 sm:pl-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={
+                            selectedRegistrations.length ===
+                              registrations.length && registrations.length > 0
+                          }
+                          onChange={selectAllRegistrations}
+                          className="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                        />
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
+                      >
+                        ID
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700"
+                      >
+                        Name / Email
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
+                      >
+                        Registered
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
+                      >
+                        Card Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700"
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-secondary-100">
+                    {filteredRegistrations.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan="5"
+                          className="px-3 sm:px-4 py-8 text-center text-sm sm:text-base text-secondary-600"
                         >
-                          ID
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700"
-                        >
-                          Name / Email
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
-                        >
-                          Registered
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700 hidden lg:table-cell"
-                        >
-                          Card Status
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-semibold text-secondary-700"
-                        >
-                          Actions
-                        </th>
+                          No registrations found
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-secondary-100">
-                      {filteredRegistrations.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan="5"
-                            className="px-3 sm:px-4 py-8 text-center text-sm sm:text-base text-secondary-600"
-                          >
-                            No registrations found
+                    ) : (
+                      filteredRegistrations.map((registration) => (
+                        <tr
+                          key={registration.id}
+                          className="hover:bg-secondary-50 transition-colors"
+                        >
+                          <td className="px-3 sm:pl-4 py-3 sm:py-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedRegistrations.includes(
+                                registration.id
+                              )}
+                              onChange={() =>
+                                toggleSelectRegistration(registration.id)
+                              }
+                              className="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
+                            />
+                          </td>
+                          <td className="px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base text-secondary-600 hidden lg:table-cell">
+                            {registration.id}
+                          </td>
+                          <td className="px-3 sm:px-4 py-3 sm:py-4">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-sm sm:text-base font-medium text-secondary-900">
+                                {registration.name}
+                              </span>
+                              <span className="text-xs sm:text-sm text-secondary-600">
+                                {registration.email}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell text-sm sm:text-base text-secondary-600">
+                            <span
+                              title={format(registration.createdAt, "PPP p")}
+                            >
+                              {registration.formattedCreatedAt}
+                            </span>
+                          </td>
+                          <td className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center ${
+                              registration.cardPrinted 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {registration.cardPrinted ? 'Printed' : 'Not Printed'}
+                            </span>
+                          </td>
+                          <td className="px-3 sm:px-4 py-3 sm:py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() =>
+                                  handleViewDetails(registration)
+                                }
+                                className="text-primary-600 hover:text-primary-700 transition-colors p-1 sm:p-2"
+                                title="View Details"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 sm:h-5 w-4 sm:w-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                  />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handlePrint(registration)}
+                                className="text-secondary-600 hover:text-primary-700 transition-colors p-1 sm:p-2"
+                                title="Print"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 sm:h-5 w-4 sm:w-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDelete(registration.id)}
+                                className="text-secondary-600 hover:text-error transition-colors p-1 sm:p-2"
+                                title="Delete"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 sm:h-5 w-4 sm:w-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
                           </td>
                         </tr>
-                      ) : (
-                        filteredRegistrations.map((registration) => (
-                          <tr
-                            key={registration.id}
-                            className="hover:bg-secondary-50 transition-colors"
-                          >
-                            <td className="px-3 sm:pl-4 py-3 sm:py-4">
-                              <input
-                                type="checkbox"
-                                checked={selectedRegistrations.includes(
-                                  registration.id
-                                )}
-                                onChange={() =>
-                                  toggleSelectRegistration(registration.id)
-                                }
-                                className="rounded border-secondary-300 text-primary-600 focus:ring-primary-500"
-                              />
-                            </td>
-                            <td className="px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base text-secondary-600 hidden lg:table-cell">
-                              {registration.id}
-                            </td>
-                            <td className="px-3 sm:px-4 py-3 sm:py-4">
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-sm sm:text-base font-medium text-secondary-900">
-                                  {registration.name}
-                                </span>
-                                <span className="text-xs sm:text-sm text-secondary-600">
-                                  {registration.email}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell text-sm sm:text-base text-secondary-600">
-                              <span
-                                title={format(registration.createdAt, "PPP p")}
-                              >
-                                {registration.formattedCreatedAt}
-                              </span>
-                            </td>
-                            <td className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-center ${
-                                registration.cardPrinted 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {registration.cardPrinted ? 'Printed' : 'Not Printed'}
-                              </span>
-                            </td>
-                            <td className="px-3 sm:px-4 py-3 sm:py-4">
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() =>
-                                    handleViewDetails(registration)
-                                  }
-                                  className="text-primary-600 hover:text-primary-700 transition-colors p-1 sm:p-2"
-                                  title="View Details"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 sm:h-5 w-4 sm:w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handlePrint(registration)}
-                                  className="text-secondary-600 hover:text-primary-700 transition-colors p-1 sm:p-2"
-                                  title="Print"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 sm:h-5 w-4 sm:w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                    />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(registration.id)}
-                                  className="text-secondary-600 hover:text-error transition-colors p-1 sm:p-2"
-                                  title="Delete"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 sm:h-5 w-4 sm:w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-
-              {/* Pagination */}
-              {hasMore && (
-                <div className="mt-4 sm:mt-6 flex justify-center">
-                  <button
-                    onClick={loadMore}
-                    disabled={loading || !hasMore}
-                    className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl border-2 border-primary-600 text-primary-700 hover:bg-primary-50 transition-colors duration-300 font-medium text-sm sm:text-base ${
-                      loading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {loading ? "Loading..." : "Load More"}
-                  </button>
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
       </div>
